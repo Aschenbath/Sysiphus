@@ -20,9 +20,17 @@
 
 ## Screenshots
 
-| Main list | Quick add and reminder settings |
-| --- | --- |
-| ![Sisyphus main list](../screenshots/sisyphus-main.png) | ![Sisyphus compose](../screenshots/sisyphus-compose.png) |
+### Browser Popup
+
+![Sisyphus browser popup](../screenshots/sisyphus-main.png)
+
+### Quick Add, Toolbar, And Reminder Panel
+
+![Sisyphus Quick Add and reminder panel](../screenshots/sisyphus-compose.png)
+
+### Chrome Notification Snooze / Done
+
+![Sisyphus Chrome notification actions](../screenshots/sisyphus-notification.png)
 
 ## Highlights
 
@@ -32,7 +40,7 @@
 | Local-first | Todos, reminders, title, quote, and view state are stored in `chrome.storage.local`. |
 | Custom app title | Double-click `Sisyphus` to rename the app; Enter/blur saves, Esc cancels, blank resets. |
 | Custom quote | Double-click the footer quote to edit the quote and author. |
-| Natural-language Quick Add | Type `明天0930 吃饭` or `12300217 吃饭`; Sisyphus extracts date, reminder time, repeat, and keeps the remaining words as the task title. |
+| Natural-language Quick Add | Type `明天0930 grab a meal` or `12300217 grab a meal`; Sisyphus extracts date, reminder time, repeat, and keeps the remaining words as the task title. |
 | Optional deadline | Set or clear a deadline when creating or editing a todo. |
 | Per-task reminders | Each todo can have its own reminder time; empty uses the global reminder time. |
 | Global reminder panel | Bell menu controls daily reminder, default time, and Snooze minutes. |
@@ -70,28 +78,28 @@ Quick Add is a lightweight natural-language parser for everyday todos. Write one
 The 8-digit shorthand is `MMDDHHMM title`: month, day, 24-hour hour, minute, then the task title. It uses the current year.
 
 ```text
-明天0930 吃饭
-后天0600 吃饭
-后天 0600 吃饭
-每天2100 吃饭
-周五1120 吃饭
-0930 吃饭
-12300217 吃饭
-06041200 吃饭
-吃饭
+明天0930 grab a meal
+后天0600 grab a meal
+后天 0600 grab a meal
+每天2100 grab a meal
+周五1120 grab a meal
+0930 grab a meal
+12300217 grab a meal
+06041200 grab a meal
+grab a meal
 ```
 
 | Input | Parsed structure | Task title |
 | --- | --- | --- |
-| `明天0930 吃饭` | due date = tomorrow, reminder = 09:30 | `吃饭` |
-| `后天0600 吃饭` | due date = day after tomorrow, reminder = 06:00 | `吃饭` |
-| `后天 0600 吃饭` | due date = day after tomorrow, reminder = 06:00 | `吃饭` |
-| `每天2100 吃饭` | repeat = daily, reminder = 21:00 | `吃饭` |
-| `周五1120 吃饭` | due date = next Friday, reminder = 11:20 | `吃饭` |
-| `0930 吃饭` | reminder = 09:30 | `吃饭` |
-| `12300217 吃饭` | due date = Dec 30 this year, reminder = 02:17 | `吃饭` |
-| `06041200 吃饭` | due date = Jun 4 this year, reminder = 12:00 | `吃饭` |
-| `吃饭` | no date or reminder extracted | `吃饭` |
+| `明天0930 grab a meal` | due date = tomorrow, reminder = 09:30 | `grab a meal` |
+| `后天0600 grab a meal` | due date = day after tomorrow, reminder = 06:00 | `grab a meal` |
+| `后天 0600 grab a meal` | due date = day after tomorrow, reminder = 06:00 | `grab a meal` |
+| `每天2100 grab a meal` | repeat = daily, reminder = 21:00 | `grab a meal` |
+| `周五1120 grab a meal` | due date = next Friday, reminder = 11:20 | `grab a meal` |
+| `0930 grab a meal` | reminder = 09:30 | `grab a meal` |
+| `12300217 grab a meal` | due date = Dec 30 this year, reminder = 02:17 | `grab a meal` |
+| `06041200 grab a meal` | due date = Jun 4 this year, reminder = 12:00 | `grab a meal` |
+| `grab a meal` | no date or reminder extracted | `grab a meal` |
 
 Supported tokens include `今天`, `明天`, `后天`, `周一` to `周日`, `星期一` to `星期日`, `每天`, `每周`, `每月`, `HHMM`, `HH:MM`, and `MMDDHHMM title`.
 
@@ -140,4 +148,5 @@ node --test tests\todo-core.test.js tests\reminder-input.test.js tests\reminder-
 node --check popup.js
 node --check background.js
 node --check todo-core.js
+node scripts\readme-screenshots.mjs
 ```

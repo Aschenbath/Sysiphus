@@ -36,7 +36,6 @@ const {
   filterTodosForView,
   formatDateDisplay,
   isTodoOverdue,
-  mergeMissingTodos,
   normalizeAppTitle,
   normalizeQuoteSettings,
   normalizeTodoViewMode,
@@ -60,36 +59,9 @@ editTodoForm.before(editFormHome);
 
 // Completed todos auto-disappear after this delay (ms)
 const FADE_DELAY = 60000;
-const RECOVERY_FLAG_KEY = 'repeatRecovery_2026_06_01';
 const APP_TITLE_KEY = 'appTitle';
 const QUOTE_SETTINGS_KEY = 'quoteSettings';
 const TODO_VIEW_MODE_KEY = 'todoViewMode';
-const RECOVERED_REPEAT_TODOS = [
-  {
-    id: 'recovered-repeat-gongyi-20260601',
-    text: '公益の签到',
-    completed: false,
-    dueDate: '2026-06-05',
-    repeat: 'daily',
-    reminderTime: '09:30',
-    nagMinutes: 0,
-    pinned: false,
-    createdAt: '2026-06-01T06:02:48.018Z',
-    recoveredAt: '2026-06-01'
-  },
-  {
-    id: 'recovered-repeat-english-20260601',
-    text: '写英语试卷',
-    completed: false,
-    dueDate: '2026-06-12',
-    repeat: 'daily',
-    reminderTime: null,
-    nagMinutes: 0,
-    pinned: true,
-    createdAt: '2026-06-01T06:26:19.461Z',
-    recoveredAt: '2026-06-01'
-  }
-];
 
 // Initialize
 applyTheme();
@@ -955,17 +927,8 @@ function saveTodos() {
   });
 }
 
-function recoverDeletedRepeatTodosIfNeeded(result) {
-  if (result[RECOVERY_FLAG_KEY]) return false;
-  const recovery = mergeMissingTodos(todos, RECOVERED_REPEAT_TODOS);
-  chrome.storage.local.set({ [RECOVERY_FLAG_KEY]: true });
-  if (!recovery.changed) return false;
-  todos = recovery.todos;
-  return true;
-}
-
 function loadTodos() {
-  chrome.storage.local.get(['todos', RECOVERY_FLAG_KEY, TODO_VIEW_MODE_KEY], (result) => {
+  chrome.storage.local.get(['todos', TODO_VIEW_MODE_KEY], (result) => {
     todoViewMode = normalizeTodoViewMode(result[TODO_VIEW_MODE_KEY]);
     todos = result.todos || [];
 
@@ -976,7 +939,6 @@ function loadTodos() {
       }
     });
     const idsChanged = normalizeTodoIds();
-    const recoveredRepeats = recoverDeletedRepeatTodosIfNeeded(result);
 
     // Repeat 真循环: completed repeat todos whose next period has arrived flip
     // back to active right when the popup opens.
@@ -985,7 +947,7 @@ function loadTodos() {
     if (rolledChanged) todos = rolled.todos;
 
     purgeExpiredCompleted();
-    if (idsChanged || recoveredRepeats || rolledChanged) saveTodos();
+    if (idsChanged || rolledChanged) saveTodos();
     renderTodos();
     scheduleAllFadeTimers();
   });

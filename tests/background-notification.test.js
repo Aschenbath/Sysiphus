@@ -82,7 +82,7 @@ test('a todo reminder uses one stable notification id', () => {
   const { listeners, calls } = loadBackground({
     storage: {
       reminderEnabled: true,
-      todos: [{ id: 'todo-a', text: '起床', completed: false, nagMinutes: 0 }]
+      todos: [{ id: 'todo-a', text: '干饭', completed: false, nagMinutes: 0 }]
     }
   });
 
@@ -98,7 +98,7 @@ test('clicking a todo notification falls back to snooze when buttons are hidden'
   const { listeners, calls } = loadBackground({
     storage: {
       snoozeMinutes: 10,
-      todos: [{ id: 'todo-a', text: '起床', completed: false }]
+      todos: [{ id: 'todo-a', text: '干饭', completed: false }]
     }
   });
 
@@ -113,7 +113,7 @@ test('snoozing stores the next visible reminder time on the todo', () => {
   const { listeners, calls, storage } = loadBackground({
     storage: {
       snoozeMinutes: 10,
-      todos: [{ id: 'todo-a', text: '起床', completed: false, reminderTime: '15:04' }]
+      todos: [{ id: 'todo-a', text: '干饭', completed: false, reminderTime: '15:04' }]
     }
   });
 
@@ -129,7 +129,7 @@ test('creating a todo notification clears stale dynamic ids for the same todo', 
     storage: {
       reminderEnabled: true,
       snoozeMinutes: 10,
-      todos: [{ id: 'todo-a', text: '起床', completed: false, nagMinutes: 0 }]
+      todos: [{ id: 'todo-a', text: '干饭', completed: false, nagMinutes: 0 }]
     },
     notifications: {
       'todo_todo-a_1780302683303': {},
@@ -150,7 +150,7 @@ test('a completed repeat todo is scheduled to come back next period', () => {
     storage: {
       reminderEnabled: true,
       reminderTime: '20:00',
-      todos: [{ id: 'r1', text: '公益签到', completed: true, completedAt, repeat: 'daily' }]
+      todos: [{ id: 'r1', text: '干饭', completed: true, completedAt, repeat: 'daily' }]
     }
   });
 
@@ -169,7 +169,7 @@ test('a reset alarm flips a due completed repeat todo back to active', () => {
     storage: {
       reminderEnabled: true,
       reminderTime: '20:00',
-      todos: [{ id: 'r1', text: '公益签到', completed: true, completedAt, repeat: 'daily', dueDate: '2020-01-01' }]
+      todos: [{ id: 'r1', text: '干饭', completed: true, completedAt, repeat: 'daily', dueDate: '2020-01-01' }]
     }
   });
 
@@ -184,7 +184,7 @@ test('overlapping daily and snooze alarms within one minute show one toast', () 
     storage: {
       reminderEnabled: true,
       snoozeMinutes: 10,
-      todos: [{ id: 'todo-a', text: '起床', completed: false, nagMinutes: 0 }]
+      todos: [{ id: 'todo-a', text: '干饭', completed: false, nagMinutes: 0 }]
     }
   });
 

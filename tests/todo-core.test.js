@@ -18,50 +18,50 @@ const {
 
 const now = new Date(2026, 5, 1, 12, 0, 0, 0); // 2026-06-01, Monday
 
-assert.deepStrictEqual(parseQuickAdd('明天0930 交数据库作业', now), {
-  text: '交数据库作业',
+assert.deepStrictEqual(parseQuickAdd('明天0930 干饭', now), {
+  text: '干饭',
   dueDate: '2026-06-02',
   repeat: 'none',
   reminderTime: '09:30'
 });
 
-assert.deepStrictEqual(parseQuickAdd('后天0600 起床', now), {
-  text: '起床',
+assert.deepStrictEqual(parseQuickAdd('后天0600 干饭', now), {
+  text: '干饭',
   dueDate: '2026-06-03',
   repeat: 'none',
   reminderTime: '06:00'
 });
 
-assert.deepStrictEqual(parseQuickAdd('后天 0600 起床', now), {
-  text: '起床',
+assert.deepStrictEqual(parseQuickAdd('后天 0600 干饭', now), {
+  text: '干饭',
   dueDate: '2026-06-03',
   repeat: 'none',
   reminderTime: '06:00'
 });
 
-assert.deepStrictEqual(parseQuickAdd('每天2100 背单词', now), {
-  text: '背单词',
+assert.deepStrictEqual(parseQuickAdd('每天2100 干饭', now), {
+  text: '干饭',
   dueDate: null,
   repeat: 'daily',
   reminderTime: '21:00'
 });
 
-assert.deepStrictEqual(parseQuickAdd('周五1120 复习JUC', now), {
-  text: '复习JUC',
+assert.deepStrictEqual(parseQuickAdd('周五1120 干饭', now), {
+  text: '干饭',
   dueDate: '2026-06-05',
   repeat: 'none',
   reminderTime: '11:20'
 });
 
-assert.deepStrictEqual(parseQuickAdd('12300217 起床', now), {
-  text: '起床',
+assert.deepStrictEqual(parseQuickAdd('12300217 干饭', now), {
+  text: '干饭',
   dueDate: '2026-12-30',
   repeat: 'none',
   reminderTime: '02:17'
 });
 
-assert.deepStrictEqual(parseQuickAdd('普通任务', now), {
-  text: '普通任务',
+assert.deepStrictEqual(parseQuickAdd('干饭', now), {
+  text: '干饭',
   dueDate: null,
   repeat: 'none',
   reminderTime: null
@@ -96,8 +96,8 @@ assert.strictEqual(normalizeTodoViewMode('all'), 'all');
 assert.strictEqual(normalizeTodoViewMode('wat'), 'all');
 
 assert.strictEqual(
-  renderTextWithSystemNumbers('15:05 <起床> & 0930'),
-  '<span class="num">15</span>:<span class="num">05</span> &lt;起床&gt; &amp; <span class="num">0930</span>'
+  renderTextWithSystemNumbers('15:05 <干饭> & 0930'),
+  '<span class="num">15</span>:<span class="num">05</span> &lt;干饭&gt; &amp; <span class="num">0930</span>'
 );
 
 assert.strictEqual(clampSnoozeMinutes(5), 5);
@@ -197,11 +197,11 @@ assert.strictEqual(lateRoll.todos[0].completed, false);
 assert.strictEqual(lateRoll.todos[0].dueDate, '2026-06-10');
 
 const recovery = mergeMissingTodos(
-  [{ id: 'existing', text: '写英语试卷', repeat: 'daily' }],
+  [{ id: 'existing', text: '干饭1', repeat: 'daily' }],
   [
-    { id: 'recover-a', text: '公益の签到', repeat: 'daily' },
-    { id: 'recover-b', text: '写英语试卷', repeat: 'daily' }
+    { id: 'recover-a', text: '干饭2', repeat: 'daily' },
+    { id: 'recover-b', text: '干饭1', repeat: 'daily' }
   ]
 );
 assert.strictEqual(recovery.changed, true);
-assert.deepStrictEqual(recovery.todos.map(t => t.text), ['公益の签到', '写英语试卷']);
+assert.deepStrictEqual(recovery.todos.map(t => t.text), ['干饭2', '干饭1']);

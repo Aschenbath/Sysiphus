@@ -20,9 +20,17 @@
 
 ## Screenshots
 
-| 메인 목록 | Quick Add 와 알림 설정 |
-| --- | --- |
-| ![Sisyphus main list](../screenshots/sisyphus-main.png) | ![Sisyphus compose](../screenshots/sisyphus-compose.png) |
+### 브라우저 Popup
+
+![Sisyphus browser popup](../screenshots/sisyphus-main.png)
+
+### Quick Add, Toolbar, Reminder Panel
+
+![Sisyphus Quick Add and reminder panel](../screenshots/sisyphus-compose.png)
+
+### Chrome Notification Snooze / Done
+
+![Sisyphus Chrome notification actions](../screenshots/sisyphus-notification.png)
 
 ## 주요 기능
 
@@ -32,7 +40,7 @@
 | Local-first | todos, reminders, title, quote, view state 는 `chrome.storage.local` 에 저장됩니다. |
 | 앱 이름 변경 | 왼쪽 위 `Sisyphus` 를 더블 클릭해 이름을 바꿀 수 있습니다. Enter/blur 저장, Esc 취소, 빈 값은 기본 이름으로 돌아갑니다. |
 | quote 변경 | footer quote 를 더블 클릭해 quote 와 author 를 수정할 수 있습니다. |
-| 자연어 Quick Add | `明天0930 吃饭` 또는 `12300217 吃饭` 을 입력하면 날짜, reminder time, repeat, task title 을 자동으로 분리합니다. |
+| 자연어 Quick Add | `明天0930 밥 먹기` 또는 `12300217 밥 먹기` 를 입력하면 날짜, reminder time, repeat, task title 을 자동으로 분리합니다. |
 | 선택적 Deadline | 생성/수정 시 deadline 을 설정하거나 지울 수 있습니다. |
 | 작업별 Reminder | 각 todo 가 고유한 reminder time 을 가질 수 있고, 비어 있으면 global time 을 사용합니다. |
 | Global reminder panel | 종 버튼에서 daily reminder, default time, Snooze minutes 를 설정합니다. |
@@ -69,28 +77,28 @@ Quick Add 는 일상 todo 를 위한 가벼운 자연어 파서입니다. 메시
 8자리 shorthand 는 `MMDDHHMM title` 입니다. 월, 일, 24시간제 시, 분, 그리고 task title 을 뜻하며, 연도는 현재 연도를 사용합니다.
 
 ```text
-明天0930 吃饭
-后天0600 吃饭
-后天 0600 吃饭
-每天2100 吃饭
-周五1120 吃饭
-0930 吃饭
-12300217 吃饭
-06041200 吃饭
-吃饭
+明天0930 밥 먹기
+后天0600 밥 먹기
+后天 0600 밥 먹기
+每天2100 밥 먹기
+周五1120 밥 먹기
+0930 밥 먹기
+12300217 밥 먹기
+06041200 밥 먹기
+밥 먹기
 ```
 
 | 입력 | 파싱 결과 | Task title |
 | --- | --- | --- |
-| `明天0930 吃饭` | due date = tomorrow, reminder = 09:30 | `吃饭` |
-| `后天0600 吃饭` | due date = day after tomorrow, reminder = 06:00 | `吃饭` |
-| `后天 0600 吃饭` | due date = day after tomorrow, reminder = 06:00 | `吃饭` |
-| `每天2100 吃饭` | repeat = daily, reminder = 21:00 | `吃饭` |
-| `周五1120 吃饭` | due date = next Friday, reminder = 11:20 | `吃饭` |
-| `0930 吃饭` | reminder = 09:30 | `吃饭` |
-| `12300217 吃饭` | due date = this year's 12/30, reminder = 02:17 | `吃饭` |
-| `06041200 吃饭` | due date = this year's 06/04, reminder = 12:00 | `吃饭` |
-| `吃饭` | 날짜나 알림을 추출하지 않는 plain todo | `吃饭` |
+| `明天0930 밥 먹기` | due date = tomorrow, reminder = 09:30 | `밥 먹기` |
+| `后天0600 밥 먹기` | due date = day after tomorrow, reminder = 06:00 | `밥 먹기` |
+| `后天 0600 밥 먹기` | due date = day after tomorrow, reminder = 06:00 | `밥 먹기` |
+| `每天2100 밥 먹기` | repeat = daily, reminder = 21:00 | `밥 먹기` |
+| `周五1120 밥 먹기` | due date = next Friday, reminder = 11:20 | `밥 먹기` |
+| `0930 밥 먹기` | reminder = 09:30 | `밥 먹기` |
+| `12300217 밥 먹기` | due date = this year's 12/30, reminder = 02:17 | `밥 먹기` |
+| `06041200 밥 먹기` | due date = this year's 06/04, reminder = 12:00 | `밥 먹기` |
+| `밥 먹기` | 날짜나 알림을 추출하지 않는 plain todo | `밥 먹기` |
 
 지원 token: `今天`, `明天`, `后天`, `周一` 부터 `周日`, `星期一` 부터 `星期日`, `每天`, `每周`, `每月`, `HHMM`, `HH:MM`, `MMDDHHMM title`.
 
@@ -130,4 +138,5 @@ node --test tests\todo-core.test.js tests\reminder-input.test.js tests\reminder-
 node --check popup.js
 node --check background.js
 node --check todo-core.js
+node scripts\readme-screenshots.mjs
 ```

@@ -55,7 +55,7 @@ test('installed event reschedules without treating Chrome details as callback', 
   const listeners = loadBackground({
     reminderEnabled: true,
     reminderTime: '20:00',
-    todos: [{ id: 'todo-a', text: '起床', completed: false }]
+    todos: [{ id: 'todo-a', text: '干饭', completed: false }]
   });
 
   assert.doesNotThrow(() => {
