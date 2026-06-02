@@ -38,7 +38,21 @@ button,
 input,
 select,
 textarea {
-  font-family: inherit;
+  font-family: var(--font-system);
+}
+
+.todo-input,
+.form-input,
+.select-display,
+.select-option,
+.form-group label,
+.reminder-label,
+.reminder-hint,
+.todo-text,
+.todo-meta,
+.todo-due,
+.empty-state {
+  font-family: var(--font-system);
 }
 
 .container {

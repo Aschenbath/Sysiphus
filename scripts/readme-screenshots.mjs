@@ -403,9 +403,8 @@ function cleanNotificationHtml() {
   }
   .title {
     margin: 0 0 9px;
-    font-family: Georgia, "Times New Roman", "Microsoft YaHei", serif;
     font-size: 30px;
-    font-weight: 700;
+    font-weight: 800;
     line-height: 1.15;
     color: #22313f;
   }
@@ -609,10 +608,10 @@ function composeHtml({ title, lead, chips, popupImage, mode = 'main', notificati
   }
   h1 {
     margin: 24px 0 18px;
-    font-family: Georgia, "Times New Roman", "Microsoft YaHei", serif;
     font-size: 54px;
     line-height: 0.98;
     letter-spacing: 0;
+    font-weight: 800;
     color: #22313f;
   }
   p {
@@ -725,8 +724,7 @@ function composeHtml({ title, lead, chips, popupImage, mode = 'main', notificati
     font-size: 28px;
     line-height: 1.15;
     color: #22313f;
-    font-family: Georgia, "Times New Roman", "Microsoft YaHei", serif;
-    font-weight: 700;
+    font-weight: 800;
   }
   .notification-body p {
     margin: 0;

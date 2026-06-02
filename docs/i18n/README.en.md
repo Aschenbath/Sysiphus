@@ -172,7 +172,7 @@ When a repeat task returns, Sisyphus clears the old `completedAt` and `snoozedUn
 | --- | --- |
 | App title | Double-click, edit, then Enter/blur to save. Esc cancels. |
 | Footer quote | Double-click the quote area to edit quote and author. |
-| Numerals | Number runs inside todo text use a system font for readability. |
+| Content font | Todo text, Quick Add input, form labels, and numerals use a system font; the title and footer quote keep Sisyphus' editorial voice. |
 | Theme | Automatically switches by local time. |
 
 ## Permissions And Privacy
