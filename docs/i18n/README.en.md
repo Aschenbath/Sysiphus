@@ -16,6 +16,13 @@
   <a href="README.ko.md">한국어</a>
 </p>
 
+<p align="center">
+  <img alt="Manifest V3" src="https://img.shields.io/badge/Manifest-V3-1f6feb?style=for-the-badge">
+  <img alt="Local First" src="https://img.shields.io/badge/Local--First-yes-2ea043?style=for-the-badge">
+  <img alt="Reminder" src="https://img.shields.io/badge/Reminder-Chrome%20Alarms-f97316?style=for-the-badge">
+  <img alt="No Build" src="https://img.shields.io/badge/Build-none-6f42c1?style=for-the-badge">
+</p>
+
 ---
 
 ## Character
@@ -24,17 +31,22 @@ Sisyphus is for the tiny recurring things that do not deserve a full project-man
 
 It opens as a Chrome popup, so it does not pull you into a new tab. After the popup closes, reminders, snoozes, and repeat resets are still scheduled through Chrome alarms.
 
-| Situation | What Sisyphus does |
-| --- | --- |
-| You want to type fast | Quick Add extracts date, time, repeat, and title from one line. |
-| The popup is closed | Background alarms still trigger Chrome notifications with `Snooze` and `Done`. |
-| A repeat task is completed | Daily, weekly, and monthly tasks return in the next cycle. |
+## ✨ Three Things To Know
+
+🧠 **One line in, structured fields out**<br>
+Quick Add extracts the date, time, repeat, and title from a single line; the rest stays as the task itself.
+
+🔔 **The popup can be closed**<br>
+Background alarms keep scheduling, and Chrome notifications offer `Snooze` and `Done` without opening the window.
+
+🔁 **A repeat task is not a one-time checkmark**<br>
+Daily, weekly, and monthly tasks return to active in the next cycle.
 
 ## Screenshots
 
 ### Demo
 
-#### Quick Add: One Line In, Structured Fields Out
+**Quick Add: One Line In, Structured Fields Out**
 
 <p align="center">
   <img src="../screenshots/sisyphus-quick-add-demo.gif" width="420" alt="Sisyphus Quick Add parses tomorrow 09:30 meal todo and shows the extracted fields">
@@ -42,7 +54,7 @@ It opens as a Chrome popup, so it does not pull you into a new tab. After the po
 
 `明天0930 干饭` is created through the real popup flow. The list keeps only the task title, `干饭`, while the edit form shows the parsed deadline and reminder time.
 
-#### Global Reminder: Manual 24-hour Input
+**Global Reminder: Manual 24-hour Input**
 
 <p align="center">
   <img src="../screenshots/sisyphus-reminder-demo.gif" width="420" alt="Sisyphus global reminder panel manual 24-hour input demo">
@@ -52,19 +64,18 @@ The bell panel is a separate global daily-reminder setting: enable/disable, defa
 
 ### Full Context
 
-#### Browser Popup
+<p align="center">
+  <img src="../screenshots/sisyphus-main.png" width="280" alt="Sisyphus browser popup">
+  <img src="../screenshots/sisyphus-compose.png" width="280" alt="Sisyphus Quick Add">
+  <img src="../screenshots/sisyphus-notification.png" width="280" alt="Sisyphus Chrome notification actions">
+</p>
 
-![Sisyphus browser popup](../screenshots/sisyphus-main.png)
+<p align="center">
+  <sub>Browser popup · Quick Add · Chrome notification Snooze / Done</sub>
+</p>
 
-#### Quick Add
-
-![Sisyphus Quick Add](../screenshots/sisyphus-compose.png)
-
-#### Chrome Notification Snooze / Done
-
-![Sisyphus Chrome notification actions](../screenshots/sisyphus-notification.png)
-
-### Clean Detail Views
+<details>
+<summary>More clean-state detail shots (controls hidden by default)</summary>
 
 #### Default Main List: Header Controls Hidden
 
@@ -96,7 +107,14 @@ The bell panel is a separate global daily-reminder setting: enable/disable, defa
   <img src="../screenshots/sisyphus-clean-notification.png" width="560" alt="Sisyphus clean notification Snooze and Done screenshot">
 </p>
 
-## Highlights
+</details>
+
+## Features
+
+Every capability lives in the table below. It stays collapsed to keep the main flow calm, and opens when you need the full list.
+
+<details>
+<summary>📋 Open the full feature table</summary>
 
 | Feature | Details |
 | --- | --- |
@@ -122,26 +140,7 @@ The bell panel is a separate global daily-reminder setting: enable/disable, defa
 | Auto day/night theme | Dark from 18:00 to 06:00, light during the day. |
 | Shortcut | Suggested shortcut: `Alt+Shift+S`. |
 
-## Core Operations
-
-| Action | Result |
-| --- | --- |
-| Click `+` | Open the add form. |
-| Press `Enter` inside the add form | Create the todo. |
-| Use an IME and press `Enter` while composing | Composition is protected; it will not submit early. |
-| Type `后天0600 grab a meal` | Parse the day after tomorrow and 06:00, keeping the rest as the title. |
-| Type `12300217 grab a meal` | Parse `MMDDHHMM title` as Dec 30, 02:17, this year. |
-| Click the deadline `x` | Clear the date. |
-| Type `0930` in reminder time | Normalize to `09:30`. |
-| Type `0930` / `09:30` / `20:00` in global reminder settings | Save a manual 24-hour default time without opening a native dropdown. |
-| Use reminder history | Reuse one of the latest three reminder times. |
-| Choose Re-remind | Remind again after the selected interval if the todo remains open. |
-| Click the todo circle | Complete or uncomplete the todo. |
-| Click todo text | Open inline editing below the current item. |
-| Click outside edit form | Collapse the edit form. |
-| Hover/focus a todo | Reveal pin and delete actions. |
-| Click the bell | Open global reminder settings. |
-| Click the eye | Toggle all todos / repeat-only view. |
+</details>
 
 ## Natural-language Quick Add
 
@@ -185,7 +184,35 @@ Supported tokens include `今天`, `明天`, `后天`, `周一` to `周日`, `�
 
 When a repeat task returns, Sisyphus clears the old `completedAt` and `snoozedUntil`. If a due date exists, it is advanced into the current or next cycle.
 
-## Customization
+## Hands-on Details
+
+You do not need to memorize these. Open the guide when you want to know how a specific action behaves.
+
+<details>
+<summary>🛠 Open the full operation guide</summary>
+
+**Operations**
+
+| Action | Result |
+| --- | --- |
+| Click `+` | Open the add form. |
+| Press `Enter` inside the add form | Create the todo. |
+| Use an IME and press `Enter` while composing | Composition is protected; it will not submit early. |
+| Type `后天0600 grab a meal` | Parse the day after tomorrow and 06:00, keeping the rest as the title. |
+| Type `12300217 grab a meal` | Parse `MMDDHHMM title` as Dec 30, 02:17, this year. |
+| Click the deadline `x` | Clear the date. |
+| Type `0930` in reminder time | Normalize to `09:30`. |
+| Type `0930` / `09:30` / `20:00` in global reminder settings | Save a manual 24-hour default time without opening a native dropdown. |
+| Use reminder history | Reuse one of the latest three reminder times. |
+| Choose Re-remind | Remind again after the selected interval if the todo remains open. |
+| Click the todo circle | Complete or uncomplete the todo. |
+| Click todo text | Open inline editing below the current item. |
+| Click outside edit form | Collapse the edit form. |
+| Hover/focus a todo | Reveal pin and delete actions. |
+| Click the bell | Open global reminder settings. |
+| Click the eye | Toggle all todos / repeat-only view. |
+
+**Customization**
 
 | Area | How it works |
 | --- | --- |
@@ -193,6 +220,8 @@ When a repeat task returns, Sisyphus clears the old `completedAt` and `snoozedUn
 | Footer quote | Double-click the quote area to edit quote and author. |
 | Content font | Todo text, Quick Add input, form labels, and numerals use a system font; the title and footer quote keep Sisyphus' editorial voice. |
 | Theme | Automatically switches by local time. |
+
+</details>
 
 ## Permissions And Privacy
 
