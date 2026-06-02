@@ -263,7 +263,7 @@ function writeDataUrlPng(dataUrl, outPath) {
   writeFileSync(outPath, Buffer.from(base64, 'base64'));
 }
 
-function popupPolishScript(theme) {
+function popupPolishScript(theme, { revealHeader = false, revealRows = false } = {}) {
   return `
     (() => {
       document.documentElement.dataset.theme = ${JSON.stringify(theme)};
@@ -275,11 +275,11 @@ function popupPolishScript(theme) {
           caret-color: transparent !important;
         }
         .header-actions {
-          opacity: 1 !important;
-          pointer-events: auto !important;
+          opacity: ${revealHeader ? '1' : '0'} !important;
+          pointer-events: ${revealHeader ? 'auto' : 'none'} !important;
         }
         .todo-actions {
-          opacity: 1 !important;
+          opacity: ${revealRows ? '1' : '0'} !important;
           transform: none !important;
         }
         .todo-item:hover {
@@ -294,6 +294,69 @@ function popupPolishScript(theme) {
       if (list) list.scrollTop = 0;
     })();
   `;
+}
+
+function headerComparisonHtml({ hiddenHeader, visibleHeader }) {
+  return `<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    width: 980px;
+    height: 330px;
+    overflow: hidden;
+    background: #f6f7f4;
+    color: #22313f;
+    font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+  }
+  .wrap {
+    width: 980px;
+    height: 330px;
+    padding: 28px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .panel {
+    border: 1px solid #d8ded8;
+    border-radius: 8px;
+    background: #ffffff;
+    overflow: hidden;
+    box-shadow: 0 16px 44px rgba(35, 45, 52, 0.12);
+  }
+  .label {
+    height: 46px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    border-bottom: 1px solid #e7ece7;
+    font-size: 14px;
+    font-weight: 800;
+    color: #53606a;
+  }
+  img {
+    width: 100%;
+    display: block;
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="panel">
+      <div class="label">默认状态：右上角三个组件隐藏</div>
+      <img src="${hiddenHeader}" alt="Sisyphus header hidden state">
+    </section>
+    <section class="panel">
+      <div class="label">hover / focus 后：Repeat、提醒、Add 出现</div>
+      <img src="${visibleHeader}" alt="Sisyphus header visible state">
+    </section>
+  </div>
+</body>
+</html>`;
 }
 
 function cleanNotificationHtml() {
@@ -387,7 +450,13 @@ function cleanNotificationHtml() {
 </html>`;
 }
 
-async function capturePopup(port, { theme = 'light', prepare = '' } = {}) {
+async function capturePopup(port, {
+  theme = 'light',
+  prepare = '',
+  revealHeader = false,
+  revealRows = false,
+  clip = null
+} = {}) {
   const client = await openPage(port);
   await client.send('Emulation.setDeviceMetricsOverride', {
     width: 360,
@@ -400,13 +469,15 @@ async function capturePopup(port, { theme = 'light', prepare = '' } = {}) {
   });
   await navigate(client, popupUrl);
   await evaluate(client, `new Promise(resolve => setTimeout(resolve, 250))`);
-  await evaluate(client, popupPolishScript(theme));
+  await evaluate(client, popupPolishScript(theme, { revealHeader, revealRows }));
   if (prepare) await evaluate(client, prepare);
   await evaluate(client, `new Promise(resolve => setTimeout(resolve, 80))`);
-  const shot = await client.send('Page.captureScreenshot', {
+  const screenshotParams = {
     format: 'png',
     fromSurface: true
-  });
+  };
+  if (clip) screenshotParams.clip = clip;
+  const shot = await client.send('Page.captureScreenshot', screenshotParams);
   client.close();
   return `data:image/png;base64,${shot.data}`;
 }
@@ -808,7 +879,21 @@ async function main() {
     await waitForChrome(port);
 
     const mainPopup = await capturePopup(port, { theme: 'light' });
-    const composePopup = await capturePopup(port, {
+    const fullToolbarPopup = await capturePopup(port, {
+      theme: 'light',
+      revealHeader: true,
+      revealRows: true
+    });
+    const hiddenHeader = await capturePopup(port, {
+      theme: 'light',
+      clip: { x: 0, y: 0, width: 360, height: 112, scale: 2 }
+    });
+    const visibleHeader = await capturePopup(port, {
+      theme: 'light',
+      revealHeader: true,
+      clip: { x: 0, y: 0, width: 360, height: 112, scale: 2 }
+    });
+    const quickAddPopup = await capturePopup(port, {
       theme: 'dark',
       prepare: `
         (async () => {
@@ -821,6 +906,14 @@ async function main() {
           document.querySelector('#repeatSelect').closest('.custom-select').querySelector('.select-display').textContent = 'Daily';
           document.getElementById('todoNagMinutes').value = '10';
           document.getElementById('todoNagMinutes').closest('.custom-select').querySelector('.select-display').textContent = '10m';
+        })();
+      `
+    });
+    const reminderPopup = await capturePopup(port, {
+      theme: 'dark',
+      revealHeader: true,
+      prepare: `
+        (async () => {
           document.getElementById('reminderPanel').classList.remove('hidden');
           document.getElementById('reminderToggle').checked = true;
           document.getElementById('reminderHour').value = '09';
@@ -830,21 +923,22 @@ async function main() {
       `
     });
     writeDataUrlPng(mainPopup, path.join(outputDir, 'sisyphus-clean-main.png'));
-    writeDataUrlPng(composePopup, path.join(outputDir, 'sisyphus-clean-compose.png'));
+    writeDataUrlPng(quickAddPopup, path.join(outputDir, 'sisyphus-clean-quick-add.png'));
+    writeDataUrlPng(reminderPopup, path.join(outputDir, 'sisyphus-clean-reminder.png'));
 
     await captureHtml(port, composeHtml({
       title: '点一下图标，待办直接弹出来',
       lead: 'Sisyphus 保持在 Chrome popup 里，打开就能看、能打卡，右上角的功能栏在需要时出现。',
       chips: ['Local-first', 'Hover toolbar', 'Repeat view'],
-      popupImage: mainPopup,
+      popupImage: fullToolbarPopup,
       mode: 'main'
     }), path.join(outputDir, 'sisyphus-main.png'));
 
     await captureHtml(port, composeHtml({
       title: '自然语言一行创建',
-      lead: '`明天0930 干饭` 会被拆成日期、提醒时间和任务名；铃铛面板同时管理每日提醒和 Snooze。',
-      chips: ['Quick Add', 'Daily reminder', 'Re-remind'],
-      popupImage: composePopup,
+      lead: '`明天0930 干饭` 会被拆成日期、提醒时间和任务名，再用手动字段补足 Repeat 和 Re-remind。',
+      chips: ['Quick Add', 'Deadline', 'Re-remind'],
+      popupImage: quickAddPopup,
       mode: 'compose'
     }), path.join(outputDir, 'sisyphus-compose.png'));
 
@@ -860,6 +954,13 @@ async function main() {
     await captureHtml(port, cleanNotificationHtml(), path.join(outputDir, 'sisyphus-clean-notification.png'), {
       width: 760,
       height: 360
+    });
+    await captureHtml(port, headerComparisonHtml({
+      hiddenHeader,
+      visibleHeader
+    }), path.join(outputDir, 'sisyphus-clean-header.png'), {
+      width: 980,
+      height: 330
     });
   } finally {
     chrome.kill();

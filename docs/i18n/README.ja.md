@@ -22,15 +22,49 @@
 
 ### 全体コンテキスト
 
-| ブラウザ Popup | Quick Add + ツールバー | Chrome 通知の Snooze / Done |
-| --- | --- | --- |
-| ![Sisyphus browser popup](../screenshots/sisyphus-main.png) | ![Sisyphus Quick Add and reminder panel](../screenshots/sisyphus-compose.png) | ![Sisyphus Chrome notification actions](../screenshots/sisyphus-notification.png) |
+#### ブラウザ Popup
+
+![Sisyphus browser popup](../screenshots/sisyphus-main.png)
+
+#### Quick Add
+
+![Sisyphus Quick Add](../screenshots/sisyphus-compose.png)
+
+#### Chrome 通知の Snooze / Done
+
+![Sisyphus Chrome notification actions](../screenshots/sisyphus-notification.png)
 
 ### ノイズを抑えた詳細
 
-| メインリスト close-up | Quick Add とリマインダー設定 close-up | 通知ボタン close-up |
-| --- | --- | --- |
-| <img src="../screenshots/sisyphus-clean-main.png" width="280" alt="Sisyphus main list close-up"> | <img src="../screenshots/sisyphus-clean-compose.png" width="280" alt="Sisyphus Quick Add and reminder panel close-up"> | <img src="../screenshots/sisyphus-clean-notification.png" width="360" alt="Sisyphus notification Snooze and Done close-up"> |
+#### デフォルトのメインリスト：ヘッダー操作は非表示
+
+<p align="center">
+  <img src="../screenshots/sisyphus-clean-main.png" width="420" alt="Sisyphus default main list close-up">
+</p>
+
+#### ヘッダーの非表示 / 表示
+
+<p align="center">
+  <img src="../screenshots/sisyphus-clean-header.png" width="820" alt="Sisyphus header hidden and visible comparison">
+</p>
+
+#### Quick Add フォーム
+
+<p align="center">
+  <img src="../screenshots/sisyphus-clean-quick-add.png" width="420" alt="Sisyphus Quick Add form close-up">
+</p>
+
+#### 毎日のリマインダー設定
+
+<p align="center">
+  <img src="../screenshots/sisyphus-clean-reminder.png" width="420" alt="Sisyphus daily reminder panel close-up">
+</p>
+
+#### 通知ボタン
+
+<p align="center">
+  <img src="../screenshots/sisyphus-clean-notification.png" width="560" alt="Sisyphus notification Snooze and Done close-up">
+</p>
 
 ## 主な機能
 

@@ -22,15 +22,49 @@
 
 ### 전체 맥락
 
-| 브라우저 Popup | Quick Add + 툴바 | Chrome 알림 Snooze / Done |
-| --- | --- | --- |
-| ![Sisyphus browser popup](../screenshots/sisyphus-main.png) | ![Sisyphus Quick Add and reminder panel](../screenshots/sisyphus-compose.png) | ![Sisyphus Chrome notification actions](../screenshots/sisyphus-notification.png) |
+#### 브라우저 Popup
+
+![Sisyphus browser popup](../screenshots/sisyphus-main.png)
+
+#### Quick Add
+
+![Sisyphus Quick Add](../screenshots/sisyphus-compose.png)
+
+#### Chrome 알림 Snooze / Done
+
+![Sisyphus Chrome notification actions](../screenshots/sisyphus-notification.png)
 
 ### 시각적 노이즈를 줄인 세부 화면
 
-| 메인 목록 close-up | Quick Add와 알림 패널 close-up | 알림 버튼 close-up |
-| --- | --- | --- |
-| <img src="../screenshots/sisyphus-clean-main.png" width="280" alt="Sisyphus main list close-up"> | <img src="../screenshots/sisyphus-clean-compose.png" width="280" alt="Sisyphus Quick Add and reminder panel close-up"> | <img src="../screenshots/sisyphus-clean-notification.png" width="360" alt="Sisyphus notification Snooze and Done close-up"> |
+#### 기본 메인 목록: 헤더 컨트롤 숨김
+
+<p align="center">
+  <img src="../screenshots/sisyphus-clean-main.png" width="420" alt="Sisyphus default main list close-up">
+</p>
+
+#### 헤더 숨김 / 표시 비교
+
+<p align="center">
+  <img src="../screenshots/sisyphus-clean-header.png" width="820" alt="Sisyphus header hidden and visible comparison">
+</p>
+
+#### Quick Add 폼
+
+<p align="center">
+  <img src="../screenshots/sisyphus-clean-quick-add.png" width="420" alt="Sisyphus Quick Add form close-up">
+</p>
+
+#### 일일 알림 패널
+
+<p align="center">
+  <img src="../screenshots/sisyphus-clean-reminder.png" width="420" alt="Sisyphus daily reminder panel close-up">
+</p>
+
+#### 알림 버튼
+
+<p align="center">
+  <img src="../screenshots/sisyphus-clean-notification.png" width="560" alt="Sisyphus notification Snooze and Done close-up">
+</p>
 
 ## 주요 기능
 

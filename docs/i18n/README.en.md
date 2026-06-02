@@ -22,15 +22,49 @@
 
 ### Full Context
 
-| Browser popup | Quick Add + toolbar | Chrome notification Snooze / Done |
-| --- | --- | --- |
-| ![Sisyphus browser popup](../screenshots/sisyphus-main.png) | ![Sisyphus Quick Add and reminder panel](../screenshots/sisyphus-compose.png) | ![Sisyphus Chrome notification actions](../screenshots/sisyphus-notification.png) |
+#### Browser Popup
+
+![Sisyphus browser popup](../screenshots/sisyphus-main.png)
+
+#### Quick Add
+
+![Sisyphus Quick Add](../screenshots/sisyphus-compose.png)
+
+#### Chrome Notification Snooze / Done
+
+![Sisyphus Chrome notification actions](../screenshots/sisyphus-notification.png)
 
 ### Clean Detail Views
 
-| Main list close-up | Quick Add and reminder panel close-up | Notification action close-up |
-| --- | --- | --- |
-| <img src="../screenshots/sisyphus-clean-main.png" width="280" alt="Sisyphus clean main list screenshot"> | <img src="../screenshots/sisyphus-clean-compose.png" width="280" alt="Sisyphus clean Quick Add and reminder panel screenshot"> | <img src="../screenshots/sisyphus-clean-notification.png" width="360" alt="Sisyphus clean notification Snooze and Done screenshot"> |
+#### Default Main List: Header Controls Hidden
+
+<p align="center">
+  <img src="../screenshots/sisyphus-clean-main.png" width="420" alt="Sisyphus clean default main list screenshot">
+</p>
+
+#### Header Hidden / Visible
+
+<p align="center">
+  <img src="../screenshots/sisyphus-clean-header.png" width="820" alt="Sisyphus header hidden and visible comparison">
+</p>
+
+#### Quick Add Form
+
+<p align="center">
+  <img src="../screenshots/sisyphus-clean-quick-add.png" width="420" alt="Sisyphus clean Quick Add form screenshot">
+</p>
+
+#### Daily Reminder Panel
+
+<p align="center">
+  <img src="../screenshots/sisyphus-clean-reminder.png" width="420" alt="Sisyphus clean daily reminder panel screenshot">
+</p>
+
+#### Notification Actions
+
+<p align="center">
+  <img src="../screenshots/sisyphus-clean-notification.png" width="560" alt="Sisyphus clean notification Snooze and Done screenshot">
+</p>
 
 ## Highlights
 

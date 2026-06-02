@@ -29,15 +29,49 @@
 
 ### 完整场景展示
 
-| Chrome 弹窗主界面 | Quick Add + 右上角功能栏 | Chrome 通知 Snooze / Done |
-| --- | --- | --- |
-| ![Sisyphus 浏览器弹出的主待办界面](docs/screenshots/sisyphus-main.png) | ![Sisyphus Quick Add、右上角功能栏和提醒设置](docs/screenshots/sisyphus-compose.png) | ![Sisyphus Chrome 通知 Snooze 和 Done](docs/screenshots/sisyphus-notification.png) |
+#### Chrome 弹窗主界面
+
+![Sisyphus 浏览器弹出的主待办界面](docs/screenshots/sisyphus-main.png)
+
+#### Quick Add 创建任务
+
+![Sisyphus Quick Add 创建任务](docs/screenshots/sisyphus-compose.png)
+
+#### Chrome 通知 Snooze / Done
+
+![Sisyphus Chrome 通知 Snooze 和 Done](docs/screenshots/sisyphus-notification.png)
 
 ### 无视觉噪音细节
 
-| 主列表 close-up | Quick Add 与提醒面板 close-up | 通知按钮 close-up |
-| --- | --- | --- |
-| <img src="docs/screenshots/sisyphus-clean-main.png" width="280" alt="Sisyphus 主列表干净截图"> | <img src="docs/screenshots/sisyphus-clean-compose.png" width="280" alt="Sisyphus Quick Add 与提醒面板干净截图"> | <img src="docs/screenshots/sisyphus-clean-notification.png" width="360" alt="Sisyphus 通知 Snooze 和 Done 干净截图"> |
+#### 默认主列表：header 三个组件隐藏
+
+<p align="center">
+  <img src="docs/screenshots/sisyphus-clean-main.png" width="420" alt="Sisyphus 默认主列表干净截图">
+</p>
+
+#### Header 隐藏 / 显形对照
+
+<p align="center">
+  <img src="docs/screenshots/sisyphus-clean-header.png" width="820" alt="Sisyphus header 默认隐藏和 hover focus 显形对照">
+</p>
+
+#### Quick Add 表单
+
+<p align="center">
+  <img src="docs/screenshots/sisyphus-clean-quick-add.png" width="420" alt="Sisyphus Quick Add 表单干净截图">
+</p>
+
+#### 每日提醒面板
+
+<p align="center">
+  <img src="docs/screenshots/sisyphus-clean-reminder.png" width="420" alt="Sisyphus 每日提醒面板干净截图">
+</p>
+
+#### 通知按钮
+
+<p align="center">
+  <img src="docs/screenshots/sisyphus-clean-notification.png" width="560" alt="Sisyphus 通知 Snooze 和 Done 干净截图">
+</p>
 
 ## 产品亮点
 
