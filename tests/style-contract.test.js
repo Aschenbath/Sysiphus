@@ -62,6 +62,17 @@ test('add-form Enter shortcut does not intercept reminder panel fields', () => {
   assert.match(popupJs, /e\.target && e\.target\.closest\('#reminderPanel'\)/);
 });
 
+test('reminder-time field commits the form on Enter', () => {
+  // The edit form has no submit button, and the document-level Enter shortcut
+  // excludes #editTodoForm, so editing only the reminder time and pressing
+  // Enter used to do nothing. Guard the keydown routing so it cannot regress.
+  assert.match(
+    popupJs,
+    /input === editTodoReminderInput\)\s*\{\s*updateTodo\(\);\s*\}\s*else\s*\{\s*addTodo\(\);/,
+    'reminder-time Enter should route to updateTodo (edit) / addTodo (add)'
+  );
+});
+
 test('README demos split real Quick Add parsing from global reminder settings', () => {
   assert.match(readme, /sisyphus-quick-add-demo\.gif/);
   assert.match(readme, /sisyphus-reminder-demo\.gif/);

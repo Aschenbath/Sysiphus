@@ -422,6 +422,21 @@ editTodoInput.addEventListener('keypress', (e) => {
     const normalized = parseReminderInput(input.value);
     input.value = normalized || '';
   });
+  // Enter in the reminder-time field should commit the form. The add form's
+  // Enter is already handled by the document capture listener, but the edit
+  // form excludes itself there (and has no submit button), so a reminder-time
+  // edit could only be saved by tabbing back to the text field. Wire Enter
+  // here so saving works from whichever field has focus.
+  input.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' || e.isComposing) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (input === editTodoReminderInput) {
+      updateTodo();
+    } else {
+      addTodo();
+    }
+  });
 });
 
 // Auto-expand extra fields on input focus
