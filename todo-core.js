@@ -98,7 +98,29 @@ function consumeQuickToken(token, result, now, textTokens) {
     ['周三', 3],
     ['周四', 4],
     ['周五', 5],
-    ['周六', 6]
+    ['周六', 6],
+    // Japanese
+    ['明後日', 'dayAfterTomorrow'],
+    ['明日', 'tomorrow'],
+    ['今日', 'today'],
+    ['日曜日', 0],
+    ['月曜日', 1],
+    ['火曜日', 2],
+    ['水曜日', 3],
+    ['木曜日', 4],
+    ['金曜日', 5],
+    ['土曜日', 6],
+    // Korean
+    ['모레', 'dayAfterTomorrow'],
+    ['내일', 'tomorrow'],
+    ['오늘', 'today'],
+    ['일요일', 0],
+    ['월요일', 1],
+    ['화요일', 2],
+    ['수요일', 3],
+    ['목요일', 4],
+    ['금요일', 5],
+    ['토요일', 6]
   ];
 
   if (!result.dueDate) {
@@ -132,7 +154,13 @@ function consumeQuickToken(token, result, now, textTokens) {
       ['daily', 'daily'],
       ['每月', 'monthly'],
       ['每周', 'weekly'],
-      ['每天', 'daily']
+      ['每天', 'daily'],
+      ['毎月', 'monthly'],
+      ['毎週', 'weekly'],
+      ['毎日', 'daily'],
+      ['매월', 'monthly'],
+      ['매주', 'weekly'],
+      ['매일', 'daily']
     ];
     const lowered = token.toLowerCase();
     const repeatPrefix = repeatPrefixes.find(([label]) => lowered.startsWith(label.toLowerCase()));

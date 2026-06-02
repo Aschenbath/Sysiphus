@@ -63,8 +63,10 @@ const QUOTE_SETTINGS_KEY = 'quoteSettings';
 const TODO_VIEW_MODE_KEY = 'todoViewMode';
 
 // Initialize
+if (typeof I18N !== 'undefined') I18N.applyStaticI18n();
 applyTheme();
 setInterval(applyTheme, 60000); // re-check every minute so it flips while open
+loadLocale();
 loadTodos();
 renderReminderHistory();
 loadAppTitle();
@@ -86,6 +88,16 @@ function applyTheme() {
   const hour = new Date().getHours();
   const dark = hour >= 18 || hour < 6;
   document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+}
+
+// Resolve UI language: stored `lang` override wins, else navigator (set in i18n.js).
+// No visible switcher; the override is mainly for screenshots and power users.
+function loadLocale() {
+  if (typeof I18N === 'undefined') return;
+  chrome.storage.local.get(['lang'], (res) => {
+    if (res && res.lang) I18N.setLocale(res.lang);
+    I18N.applyStaticI18n();
+  });
 }
 
 // ---------- Daily reminder settings ----------

@@ -4,7 +4,7 @@
 
 // Share the repeat-cycle date logic with the popup so "明天重置" stays identical
 // whether the popup is open or not.
-importScripts('todo-core.js');
+importScripts('i18n.js', 'todo-core.js');
 const { nextRepeatResetTime, rolloverRepeatTodos } = globalThis.TodoCore;
 
 chrome.runtime.onInstalled.addListener(reschedule);
@@ -151,23 +151,29 @@ function reschedule(done) {
 
 function notifyTodo(todo, snoozeMinutes) {
   const id = 'todo_' + todo.id;
-  const options = {
-    type: 'basic',
-    iconUrl: 'icon.png',
-    title: todo.text || 'Reminder',
-    message: `Click to snooze ${snoozeMinutes} min`,
-    priority: 2,
-    requireInteraction: true,
-    buttons: [
-      { title: `${snoozeMinutes} min later` },
-      { title: 'Done' }
-    ]
-  };
+  // Reminders fire while the popup is closed, so resolve the UI language straight
+  // from storage here; buttons stay English (shared technical labels).
+  chrome.storage.local.get(['lang'], (res) => {
+    if (typeof I18N !== 'undefined' && res && res.lang) I18N.setLocale(res.lang);
+    const tr = (key, vars) => (typeof I18N !== 'undefined' ? I18N.t(key, vars) : null);
+    const options = {
+      type: 'basic',
+      iconUrl: 'icon.png',
+      title: todo.text || tr('notify.titleFallback') || 'Reminder',
+      message: tr('notify.clickToSnooze', { min: snoozeMinutes }) || `Click to snooze ${snoozeMinutes} min`,
+      priority: 2,
+      requireInteraction: true,
+      buttons: [
+        { title: `${snoozeMinutes} min later` },
+        { title: 'Done' }
+      ]
+    };
 
-  // Stable ids make repeated daily/snooze alarms replace the same toast instead
-  // of stacking duplicate Sisyphus notifications.
-  clearOldTodoNotifications(todo.id, id, () => {
-    chrome.notifications.create(id, options);
+    // Stable ids make repeated daily/snooze alarms replace the same toast instead
+    // of stacking duplicate Sisyphus notifications.
+    clearOldTodoNotifications(todo.id, id, () => {
+      chrome.notifications.create(id, options);
+    });
   });
 }
 

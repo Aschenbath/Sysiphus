@@ -12,83 +12,214 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(scriptDir, '..');
-const outputDir = path.join(projectRoot, 'docs', 'screenshots');
+const baseOutputDir = path.join(projectRoot, 'docs', 'screenshots');
+let outputDir = baseOutputDir;
 const popupUrl = pathToFileURL(path.join(projectRoot, 'popup.html')).href;
 const iconData = `data:image/png;base64,${readFileSync(path.join(projectRoot, 'icon.png')).toString('base64')}`;
 
-const neutralTodos = [
-  {
-    id: 'meal-daily',
-    text: '每天2100 干饭',
-    dueDate: '2026-06-02',
-    repeat: 'daily',
-    reminderTime: '21:00',
-    nagMinutes: 10,
-    completed: false,
-    pinned: true,
-    createdAt: '2026-06-02T08:00:00.000Z'
-  },
-  {
-    id: 'meal-tomorrow',
-    text: '明天0930 干饭',
-    dueDate: '2026-06-03',
-    repeat: 'none',
-    reminderTime: '09:30',
-    nagMinutes: 0,
-    completed: false,
-    pinned: false,
-    createdAt: '2026-06-02T07:00:00.000Z'
-  },
-  {
-    id: 'meal-compact',
-    text: '12300217 干饭',
-    dueDate: '2026-12-30',
-    repeat: 'none',
-    reminderTime: '02:17',
-    nagMinutes: 0,
-    completed: false,
-    pinned: false,
-    createdAt: '2026-06-02T06:00:00.000Z'
-  },
-  {
-    id: 'meal-weekly',
-    text: '周五1120 干饭',
-    dueDate: '2026-06-05',
-    repeat: 'weekly',
-    reminderTime: '11:20',
-    nagMinutes: 5,
-    completed: false,
-    pinned: false,
-    createdAt: '2026-06-02T05:00:00.000Z'
-  },
-  {
-    id: 'meal-done',
-    text: '干饭',
-    dueDate: null,
-    repeat: 'none',
-    reminderTime: null,
-    nagMinutes: 0,
-    completed: true,
-    completedAt: Date.now() - 15000,
-    pinned: false,
-    createdAt: '2026-06-02T04:00:00.000Z'
-  }
-];
+// CJK fallbacks so ja/ko frame copy never renders as tofu on a clean Win11 box.
+const FONT_STACK = 'ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "Meiryo", "Malgun Gothic", sans-serif';
 
-const storage = {
-  todos: neutralTodos,
-  reminderEnabled: true,
-  reminderTime: '09:30',
-  snoozeMinutes: 10,
-  reminderHistory: ['09:30', '21:00', '02:17'],
-  appTitle: 'Sisyphus',
-  quoteSettings: {
-    text: 'One must imagine Sisyphus happy.',
-    author: 'Albert Camus'
+const LANGS = ['zh', 'en', 'ja', 'ko'];
+
+// Per-language demo content. Short technical labels (Repeat / Add / Snooze / Done /
+// Daily, the chips, the eyebrow) stay English across every language, matching the
+// product UI; only the prose, sample task text, and the Quick Add typed line localize.
+const LOCALE_DATA = {
+  zh: {
+    tag: 'zh-CN',
+    dir: '',
+    mealWord: '干饭',
+    quickText: '明天0930 干饭',
+    tasks: ['每天2100 干饭', '明天0930 干饭', '12300217 干饭', '周五1120 干饭', '干饭'],
+    headerHidden: '默认状态：右上角三个组件隐藏',
+    headerVisible: 'hover / focus 后：Repeat、提醒、Add 出现',
+    cleanNote: '到提醒时间后，可直接 Snooze，或在后台标记 Done。',
+    notifyBody: '到提醒时间后，通知可以直接 Snooze，或者在后台标记 Done。',
+    shotMain: {
+      title: 'Popup 形式的待办插件',
+      lead: '小事写进工具栏，不占新页面；到点由 Chrome 通知敲一下，做完就安静退场。',
+      callout: '浏览器工具栏中的扩展入口、弹出的 popup、hover 后可见的 repeat / reminder / add 功能栏。'
+    },
+    shotCompose: {
+      title: '像发消息一样创建任务',
+      lead: '`明天0930 干饭` 会被拆成日期、提醒时间和任务名，Repeat 与 Re-remind 再手动补上一刀。',
+      callout: '自然语言输入、展开的右上角功能栏、每日提醒面板、Repeat 与 Re-remind 控件。'
+    },
+    shotNotification: {
+      title: '到点后不用开 popup',
+      lead: 'Snooze 先放一放，Done 直接收掉；popup 关闭后，background alarm 继续守着下一次。'
+    }
   },
-  todoViewMode: 'all',
-  repeatRecovery_2026_06_01: true
+  en: {
+    tag: 'en-US',
+    dir: 'en',
+    mealWord: 'grab a meal',
+    quickText: 'tomorrow 0930 grab a meal',
+    tasks: ['daily 2100 grab a meal', 'tomorrow 0930 grab a meal', '12300217 grab a meal', 'friday 1120 grab a meal', 'grab a meal'],
+    headerHidden: 'Default: the three top-right controls stay hidden',
+    headerVisible: 'After hover / focus: Repeat, reminder, Add appear',
+    cleanNote: 'At reminder time you can Snooze it, or mark it Done from the background.',
+    notifyBody: 'At reminder time the notification can Snooze directly, or be marked Done in the background.',
+    shotMain: {
+      title: 'A to-do extension that lives in a popup',
+      lead: 'Small things go into the toolbar, not a new tab; Chrome taps you at the right time, and a finished task quietly leaves.',
+      callout: 'The extension entry in the toolbar, the popup it opens, and the repeat / reminder / add bar revealed on hover.'
+    },
+    shotCompose: {
+      title: 'Create a task like sending a message',
+      lead: '`tomorrow 0930 grab a meal` is split into date, reminder time, and title; Repeat and Re-remind are one manual tap away.',
+      callout: 'Natural-language input, the expanded top-right bar, the daily reminder panel, and the Repeat / Re-remind controls.'
+    },
+    shotNotification: {
+      title: 'No need to open the popup',
+      lead: 'Snooze to defer, Done to clear it; after the popup closes, the background alarm keeps watch for the next one.'
+    }
+  },
+  ja: {
+    tag: 'ja-JP',
+    dir: 'ja',
+    mealWord: 'ごはん',
+    quickText: '明日0930 ごはん',
+    tasks: ['毎日2100 ごはん', '明日0930 ごはん', '12300217 ごはん', '金曜日1120 ごはん', 'ごはん'],
+    headerHidden: '既定：右上の3つのボタンは非表示',
+    headerVisible: 'hover / focus すると：Repeat・リマインド・Add が出現',
+    cleanNote: 'リマインド時刻になったら、その場で Snooze、またはバックグラウンドで Done。',
+    notifyBody: 'リマインド時刻になると、通知から直接 Snooze、またはバックグラウンドで Done にできる。',
+    shotMain: {
+      title: 'ポップアップに住む ToDo 拡張',
+      lead: '小さな用事はツールバーへ、新しいタブは開かない。時間になると Chrome が通知し、終わったタスクは静かに消える。',
+      callout: 'ツールバーの拡張アイコン、開いたポップアップ、hover で現れる repeat / reminder / add バー。'
+    },
+    shotCompose: {
+      title: 'メッセージのようにタスクを作る',
+      lead: '`明日0930 ごはん` は日付・リマインド時刻・タイトルに分解され、Repeat と Re-remind は手動でもう一手。',
+      callout: '自然言語入力、展開した右上バー、毎日リマインドパネル、Repeat と Re-remind コントロール。'
+    },
+    shotNotification: {
+      title: 'ポップアップを開かなくていい',
+      lead: 'Snooze で後回し、Done で完了。ポップアップを閉じても、バックグラウンドの alarm が次を見張る。'
+    }
+  },
+  ko: {
+    tag: 'ko-KR',
+    dir: 'ko',
+    mealWord: '밥먹기',
+    quickText: '내일0930 밥먹기',
+    tasks: ['매일2100 밥먹기', '내일0930 밥먹기', '12300217 밥먹기', '금요일1120 밥먹기', '밥먹기'],
+    headerHidden: '기본: 오른쪽 위 버튼 3개는 숨김',
+    headerVisible: 'hover / focus 하면: Repeat, 알림, Add 표시',
+    cleanNote: '알림 시각이 되면 바로 Snooze하거나 백그라운드에서 Done할 수 있어요.',
+    notifyBody: '알림 시각이 되면 알림에서 바로 Snooze하거나 백그라운드에서 Done할 수 있어요.',
+    shotMain: {
+      title: '팝업에 사는 할 일 확장',
+      lead: '작은 일은 새 탭이 아니라 도구 모음에. 때가 되면 Chrome가 알려주고, 끝낸 일은 조용히 사라져요.',
+      callout: '도구 모음의 확장 아이콘, 열린 팝업, hover하면 보이는 repeat / reminder / add 바.'
+    },
+    shotCompose: {
+      title: '메시지 보내듯 할 일 만들기',
+      lead: '`내일0930 밥먹기`는 날짜·알림 시각·제목으로 나뉘고, Repeat과 Re-remind는 수동으로 한 번 더.',
+      callout: '자연어 입력, 펼친 오른쪽 위 바, 매일 알림 패널, Repeat과 Re-remind 컨트롤.'
+    },
+    shotNotification: {
+      title: '팝업을 열 필요 없이',
+      lead: 'Snooze로 미루고 Done으로 정리. 팝업을 닫아도 백그라운드 alarm이 다음을 지켜봐요.'
+    }
+  }
 };
+
+// Chips and the eyebrow are short technical labels: identical across all four languages.
+const CHIPS = {
+  main: ['Local-first', 'Hover toolbar', 'Repeat view'],
+  compose: ['Quick Add', 'Deadline', 'Re-remind'],
+  notification: ['Chrome alarms', 'Snooze', 'Done']
+};
+
+let currentLang = 'zh';
+let currentData = LOCALE_DATA.zh;
+let currentLangTag = 'zh-CN';
+
+function buildTodos(data) {
+  const t = data.tasks;
+  return [
+    {
+      id: 'meal-daily',
+      text: t[0],
+      dueDate: '2026-06-02',
+      repeat: 'daily',
+      reminderTime: '21:00',
+      nagMinutes: 10,
+      completed: false,
+      pinned: true,
+      createdAt: '2026-06-02T08:00:00.000Z'
+    },
+    {
+      id: 'meal-tomorrow',
+      text: t[1],
+      dueDate: '2026-06-03',
+      repeat: 'none',
+      reminderTime: '09:30',
+      nagMinutes: 0,
+      completed: false,
+      pinned: false,
+      createdAt: '2026-06-02T07:00:00.000Z'
+    },
+    {
+      id: 'meal-compact',
+      text: t[2],
+      dueDate: '2026-12-30',
+      repeat: 'none',
+      reminderTime: '02:17',
+      nagMinutes: 0,
+      completed: false,
+      pinned: false,
+      createdAt: '2026-06-02T06:00:00.000Z'
+    },
+    {
+      id: 'meal-weekly',
+      text: t[3],
+      dueDate: '2026-06-05',
+      repeat: 'weekly',
+      reminderTime: '11:20',
+      nagMinutes: 5,
+      completed: false,
+      pinned: false,
+      createdAt: '2026-06-02T05:00:00.000Z'
+    },
+    {
+      id: 'meal-done',
+      text: t[4],
+      dueDate: null,
+      repeat: 'none',
+      reminderTime: null,
+      nagMinutes: 0,
+      completed: true,
+      completedAt: Date.now() - 15000,
+      pinned: false,
+      createdAt: '2026-06-02T04:00:00.000Z'
+    }
+  ];
+}
+
+function buildStorage(data) {
+  return {
+    todos: buildTodos(data),
+    reminderEnabled: true,
+    reminderTime: '09:30',
+    snoozeMinutes: 10,
+    reminderHistory: ['09:30', '21:00', '02:17'],
+    appTitle: 'Sisyphus',
+    quoteSettings: {
+      text: 'One must imagine Sisyphus happy.',
+      author: 'Albert Camus'
+    },
+    todoViewMode: 'all',
+    repeatRecovery_2026_06_01: true,
+    lang: data === LOCALE_DATA.zh ? 'zh' : data.dir
+  };
+}
+
+let storage = buildStorage(currentData);
 
 function findChrome() {
   const candidates = [
@@ -203,6 +334,10 @@ function chromeStorageMockScript(initialStorage) {
   return `
     (() => {
       const storage = ${JSON.stringify(initialStorage)};
+      try {
+        Object.defineProperty(navigator, 'language', { get: () => ${JSON.stringify(currentLangTag)}, configurable: true });
+        Object.defineProperty(navigator, 'languages', { get: () => [${JSON.stringify(currentLangTag)}], configurable: true });
+      } catch (e) {}
       const listeners = [];
       function pick(keys) {
         if (keys == null) return { ...storage };
@@ -307,7 +442,7 @@ function popupPolishScript(theme, { revealHeader = false, revealRows = false } =
 
 function headerComparisonHtml({ hiddenHeader, visibleHeader }) {
   return `<!doctype html>
-<html lang="zh-CN">
+<html lang="${currentLangTag}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -320,7 +455,7 @@ function headerComparisonHtml({ hiddenHeader, visibleHeader }) {
     overflow: hidden;
     background: #f6f7f4;
     color: #22313f;
-    font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    font-family: ${FONT_STACK};
   }
   .wrap {
     width: 980px;
@@ -356,11 +491,11 @@ function headerComparisonHtml({ hiddenHeader, visibleHeader }) {
 <body>
   <div class="wrap">
     <section class="panel">
-      <div class="label">默认状态：右上角三个组件隐藏</div>
+      <div class="label">${currentData.headerHidden}</div>
       <img src="${hiddenHeader}" alt="Sisyphus header hidden state">
     </section>
     <section class="panel">
-      <div class="label">hover / focus 后：Repeat、提醒、Add 出现</div>
+      <div class="label">${currentData.headerVisible}</div>
       <img src="${visibleHeader}" alt="Sisyphus header visible state">
     </section>
   </div>
@@ -370,7 +505,7 @@ function headerComparisonHtml({ hiddenHeader, visibleHeader }) {
 
 function cleanNotificationHtml() {
   return `<!doctype html>
-<html lang="zh-CN">
+<html lang="${currentLangTag}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -384,7 +519,7 @@ function cleanNotificationHtml() {
     display: grid;
     place-items: center;
     background: #f5f7f3;
-    font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    font-family: ${FONT_STACK};
     color: #243241;
   }
   .notification {
@@ -449,8 +584,8 @@ function cleanNotificationHtml() {
   <section class="notification">
     <div class="head"><img src="${iconData}" alt="">Sisyphus · Chrome notification</div>
     <div class="body">
-      <h1 class="title">干饭</h1>
-      <p class="message">到提醒时间后，可直接 Snooze，或在后台标记 Done。</p>
+      <h1 class="title">${currentData.mealWord}</h1>
+      <p class="message">${currentData.cleanNote}</p>
     </div>
     <div class="actions"><button>Snooze</button><button>Done</button></div>
   </section>
@@ -557,7 +692,7 @@ async function captureQuickAddDemoGif(port, outPath) {
     `);
     frame = await writeFrame(client, frameDir, frame, 6);
 
-    const quickText = '明天0930 干饭';
+    const quickText = currentData.quickText;
     for (let i = 1; i <= quickText.length; i++) {
       await evaluate(client, `
         (() => {
@@ -672,7 +807,7 @@ async function captureReminderDemoGif(port, outPath) {
 function composeHtml({ title, lead, chips, popupImage, mode = 'main', notification = false }) {
   const chipHtml = chips.map(chip => `<span>${chip}</span>`).join('');
   return `<!doctype html>
-<html lang="zh-CN">
+<html lang="${currentLangTag}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -685,7 +820,7 @@ function composeHtml({ title, lead, chips, popupImage, mode = 'main', notificati
     overflow: hidden;
     background: #edf1ec;
     color: #1d2935;
-    font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    font-family: ${FONT_STACK};
   }
   .stage {
     position: relative;
@@ -998,14 +1133,14 @@ function composeHtml({ title, lead, chips, popupImage, mode = 'main', notificati
         <div class="notification">
           <div class="notification-head"><img src="${iconData}" alt="">Sisyphus · Chrome notification</div>
           <div class="notification-body">
-            <div class="notification-title">干饭</div>
-            <p>到提醒时间后，通知可以直接 Snooze，或者在后台标记 Done。</p>
+            <div class="notification-title">${currentData.mealWord}</div>
+            <p>${currentData.notifyBody}</p>
           </div>
           <div class="notification-actions"><button>Snooze</button><button>Done</button></div>
         </div>` : `
         <div class="callout"><strong>Shown in this shot</strong>${mode === 'compose'
-          ? '自然语言输入、展开的右上角功能栏、每日提醒面板、Repeat 与 Re-remind 控件。'
-          : '浏览器工具栏中的扩展入口、弹出的 popup、hover 后可见的 repeat / reminder / add 功能栏。'}</div>`}
+          ? currentData.shotCompose.callout
+          : currentData.shotMain.callout}</div>`}
       </div>
     </div>
   </div>
@@ -1064,91 +1199,101 @@ async function main() {
   try {
     await waitForChrome(port);
 
-    const mainPopup = await capturePopup(port, { theme: 'light' });
-    const fullToolbarPopup = await capturePopup(port, {
-      theme: 'light',
-      revealHeader: true,
-      revealRows: true
-    });
-    const hiddenHeader = await capturePopup(port, {
-      theme: 'light',
-      clip: { x: 0, y: 0, width: 360, height: 112, scale: 2 }
-    });
-    const visibleHeader = await capturePopup(port, {
-      theme: 'light',
-      revealHeader: true,
-      clip: { x: 0, y: 0, width: 360, height: 112, scale: 2 }
-    });
-    const quickAddPopup = await capturePopup(port, {
-      theme: 'dark',
-      prepare: `
-        (async () => {
-          document.getElementById('addTodoForm').classList.remove('hidden');
-          document.querySelector('#addTodoForm .extra-fields').classList.add('show');
-          document.getElementById('todoInput').value = '明天0930 干饭';
-          document.getElementById('dueDateDisplay').value = '06/03';
-          document.getElementById('todoReminderInput').value = '09:30';
-          document.querySelector('#repeatSelect').value = 'daily';
-          document.querySelector('#repeatSelect').closest('.custom-select').querySelector('.select-display').textContent = 'Daily';
-          document.getElementById('todoNagMinutes').value = '10';
-          document.getElementById('todoNagMinutes').closest('.custom-select').querySelector('.select-display').textContent = '10m';
-        })();
-      `
-    });
-    const reminderPopup = await capturePopup(port, {
-      theme: 'dark',
-      revealHeader: true,
-      prepare: `
-        (async () => {
-          document.getElementById('reminderPanel').classList.remove('hidden');
-          document.getElementById('reminderToggle').checked = true;
-          document.getElementById('reminderTimeInput').value = '09:30';
-          document.getElementById('snoozeMinutes').value = '10';
-        })();
-      `
-    });
-    writeDataUrlPng(mainPopup, path.join(outputDir, 'sisyphus-clean-main.png'));
-    writeDataUrlPng(quickAddPopup, path.join(outputDir, 'sisyphus-clean-quick-add.png'));
-    writeDataUrlPng(reminderPopup, path.join(outputDir, 'sisyphus-clean-reminder.png'));
+    for (const lang of LANGS) {
+      currentLang = lang;
+      currentData = LOCALE_DATA[lang];
+      currentLangTag = currentData.tag;
+      storage = buildStorage(currentData);
+      outputDir = path.join(baseOutputDir, currentData.dir);
+      mkdirSync(outputDir, { recursive: true });
+      console.log(`[sisyphus] ${lang} → ${outputDir}`);
 
-    await captureHtml(port, composeHtml({
-      title: 'Popup 形式的待办插件',
-      lead: '小事写进工具栏，不占新页面；到点由 Chrome 通知敲一下，做完就安静退场。',
-      chips: ['Local-first', 'Hover toolbar', 'Repeat view'],
-      popupImage: fullToolbarPopup,
-      mode: 'main'
-    }), path.join(outputDir, 'sisyphus-main.png'));
+      const mainPopup = await capturePopup(port, { theme: 'light' });
+      const fullToolbarPopup = await capturePopup(port, {
+        theme: 'light',
+        revealHeader: true,
+        revealRows: true
+      });
+      const hiddenHeader = await capturePopup(port, {
+        theme: 'light',
+        clip: { x: 0, y: 0, width: 360, height: 112, scale: 2 }
+      });
+      const visibleHeader = await capturePopup(port, {
+        theme: 'light',
+        revealHeader: true,
+        clip: { x: 0, y: 0, width: 360, height: 112, scale: 2 }
+      });
+      const quickAddPopup = await capturePopup(port, {
+        theme: 'dark',
+        prepare: `
+          (async () => {
+            document.getElementById('addTodoForm').classList.remove('hidden');
+            document.querySelector('#addTodoForm .extra-fields').classList.add('show');
+            document.getElementById('todoInput').value = ${JSON.stringify(currentData.quickText)};
+            document.getElementById('dueDateDisplay').value = '06/03';
+            document.getElementById('todoReminderInput').value = '09:30';
+            document.querySelector('#repeatSelect').value = 'daily';
+            document.querySelector('#repeatSelect').closest('.custom-select').querySelector('.select-display').textContent = 'Daily';
+            document.getElementById('todoNagMinutes').value = '10';
+            document.getElementById('todoNagMinutes').closest('.custom-select').querySelector('.select-display').textContent = '10m';
+          })();
+        `
+      });
+      const reminderPopup = await capturePopup(port, {
+        theme: 'dark',
+        revealHeader: true,
+        prepare: `
+          (async () => {
+            document.getElementById('reminderPanel').classList.remove('hidden');
+            document.getElementById('reminderToggle').checked = true;
+            document.getElementById('reminderTimeInput').value = '09:30';
+            document.getElementById('snoozeMinutes').value = '10';
+          })();
+        `
+      });
+      writeDataUrlPng(mainPopup, path.join(outputDir, 'sisyphus-clean-main.png'));
+      writeDataUrlPng(quickAddPopup, path.join(outputDir, 'sisyphus-clean-quick-add.png'));
+      writeDataUrlPng(reminderPopup, path.join(outputDir, 'sisyphus-clean-reminder.png'));
 
-    await captureHtml(port, composeHtml({
-      title: '像发消息一样创建任务',
-      lead: '`明天0930 干饭` 会被拆成日期、提醒时间和任务名，Repeat 与 Re-remind 再手动补上一刀。',
-      chips: ['Quick Add', 'Deadline', 'Re-remind'],
-      popupImage: quickAddPopup,
-      mode: 'compose'
-    }), path.join(outputDir, 'sisyphus-compose.png'));
+      await captureHtml(port, composeHtml({
+        title: currentData.shotMain.title,
+        lead: currentData.shotMain.lead,
+        chips: CHIPS.main,
+        popupImage: fullToolbarPopup,
+        mode: 'main'
+      }), path.join(outputDir, 'sisyphus-main.png'));
 
-    await captureHtml(port, composeHtml({
-      title: '到点后不用开 popup',
-      lead: 'Snooze 先放一放，Done 直接收掉；popup 关闭后，background alarm 继续守着下一次。',
-      chips: ['Chrome alarms', 'Snooze', 'Done'],
-      popupImage: mainPopup,
-      mode: 'main',
-      notification: true
-    }), path.join(outputDir, 'sisyphus-notification.png'));
+      await captureHtml(port, composeHtml({
+        title: currentData.shotCompose.title,
+        lead: currentData.shotCompose.lead,
+        chips: CHIPS.compose,
+        popupImage: quickAddPopup,
+        mode: 'compose'
+      }), path.join(outputDir, 'sisyphus-compose.png'));
 
-    await captureHtml(port, cleanNotificationHtml(), path.join(outputDir, 'sisyphus-clean-notification.png'), {
-      width: 760,
-      height: 360
-    });
-    await captureHtml(port, headerComparisonHtml({
-      hiddenHeader,
-      visibleHeader
-    }), path.join(outputDir, 'sisyphus-clean-header.png'), {
-      width: 980,
-      height: 330
-    });
-    await captureQuickAddDemoGif(port, path.join(outputDir, 'sisyphus-quick-add-demo.gif'));
-    await captureReminderDemoGif(port, path.join(outputDir, 'sisyphus-reminder-demo.gif'));
+      await captureHtml(port, composeHtml({
+        title: currentData.shotNotification.title,
+        lead: currentData.shotNotification.lead,
+        chips: CHIPS.notification,
+        popupImage: mainPopup,
+        mode: 'main',
+        notification: true
+      }), path.join(outputDir, 'sisyphus-notification.png'));
+
+      await captureHtml(port, cleanNotificationHtml(), path.join(outputDir, 'sisyphus-clean-notification.png'), {
+        width: 760,
+        height: 360
+      });
+      await captureHtml(port, headerComparisonHtml({
+        hiddenHeader,
+        visibleHeader
+      }), path.join(outputDir, 'sisyphus-clean-header.png'), {
+        width: 980,
+        height: 330
+      });
+      await captureQuickAddDemoGif(port, path.join(outputDir, 'sisyphus-quick-add-demo.gif'));
+      await captureReminderDemoGif(port, path.join(outputDir, 'sisyphus-reminder-demo.gif'));
+    }
   } finally {
     chrome.kill();
     await delay(200);

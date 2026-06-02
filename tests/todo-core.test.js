@@ -67,6 +67,64 @@ assert.deepStrictEqual(parseQuickAdd('干饭', now), {
   reminderTime: null
 });
 
+// Japanese Quick Add tokens (localized demos must parse natural date words)
+assert.deepStrictEqual(parseQuickAdd('明日0930 ごはん', now), {
+  text: 'ごはん',
+  dueDate: '2026-06-02',
+  repeat: 'none',
+  reminderTime: '09:30'
+});
+
+assert.deepStrictEqual(parseQuickAdd('明後日0600 ごはん', now), {
+  text: 'ごはん',
+  dueDate: '2026-06-03',
+  repeat: 'none',
+  reminderTime: '06:00'
+});
+
+assert.deepStrictEqual(parseQuickAdd('毎日2100 ごはん', now), {
+  text: 'ごはん',
+  dueDate: null,
+  repeat: 'daily',
+  reminderTime: '21:00'
+});
+
+assert.deepStrictEqual(parseQuickAdd('金曜日1120 ごはん', now), {
+  text: 'ごはん',
+  dueDate: '2026-06-05',
+  repeat: 'none',
+  reminderTime: '11:20'
+});
+
+// Korean Quick Add tokens
+assert.deepStrictEqual(parseQuickAdd('내일0930 밥먹기', now), {
+  text: '밥먹기',
+  dueDate: '2026-06-02',
+  repeat: 'none',
+  reminderTime: '09:30'
+});
+
+assert.deepStrictEqual(parseQuickAdd('모레0600 밥먹기', now), {
+  text: '밥먹기',
+  dueDate: '2026-06-03',
+  repeat: 'none',
+  reminderTime: '06:00'
+});
+
+assert.deepStrictEqual(parseQuickAdd('매일2100 밥먹기', now), {
+  text: '밥먹기',
+  dueDate: null,
+  repeat: 'daily',
+  reminderTime: '21:00'
+});
+
+assert.deepStrictEqual(parseQuickAdd('금요일1120 밥먹기', now), {
+  text: '밥먹기',
+  dueDate: '2026-06-05',
+  repeat: 'none',
+  reminderTime: '11:20'
+});
+
 assert.strictEqual(formatDateDisplay('2026-06-05'), '06/05');
 assert.strictEqual(formatDateDisplay(''), '');
 assert.strictEqual(formatDateDisplay(null), '');

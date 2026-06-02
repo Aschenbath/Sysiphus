@@ -23,7 +23,7 @@
             <path d="M6.1 6.8C3.5 8.5 2 12 2 12s3.5 7 10 7a9.8 9.8 0 0 0 4.1-.9"></path>
           </svg>
         </button>
-        <button id="reminderBtn" class="bell-btn" title="每日提醒">
+        <button id="reminderBtn" class="bell-btn" title="每日提醒" data-i18n-title="bell.title">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
@@ -40,16 +40,16 @@
 
     <div id="reminderPanel" class="reminder-panel hidden">
       <div class="reminder-row">
-        <span class="reminder-label">每日提醒</span>
+        <span class="reminder-label" data-i18n="reminder.dailyLabel">每日提醒</span>
         <label class="switch">
           <input type="checkbox" id="reminderToggle">
           <span class="slider"></span>
         </label>
       </div>
       <div class="reminder-row">
-        <span class="reminder-label">提醒时间</span>
+        <span class="reminder-label" data-i18n="reminder.timeLabel">提醒时间</span>
         <div class="time-select">
-          <input type="text" id="reminderTimeInput" class="time-field reminder-time-input" aria-label="提醒时间，24 小时制" placeholder="20:00" maxlength="5" inputmode="numeric" autocomplete="off">
+          <input type="text" id="reminderTimeInput" class="time-field reminder-time-input" aria-label="提醒时间，24 小时制" data-i18n-aria="reminder.timeAria" placeholder="20:00" maxlength="5" inputmode="numeric" autocomplete="off">
         </div>
       </div>
       <div class="reminder-row">
@@ -61,11 +61,11 @@
           <option value="30">30m</option>
         </select>
       </div>
-      <p class="reminder-hint">没完成的待办会在这个时间弹窗提醒你打卡</p>
+      <p class="reminder-hint" data-i18n="reminder.hint">没完成的待办会在这个时间弹窗提醒你打卡</p>
     </div>
 
     <div id="addTodoForm" class="add-form hidden">
-      <input type="text" id="todoInput" placeholder="What needs to be done?  明天0930 / 每天2100" class="todo-input" autofocus>
+      <input type="text" id="todoInput" placeholder="要做点什么？  明天0930 / 每天2100" data-i18n-placeholder="input.placeholder" class="todo-input" autofocus>
 
       <div id="extraFields" class="extra-fields">
         <div class="form-row">
@@ -106,8 +106,8 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label>提醒时间</label>
-            <input type="text" id="todoReminderInput" class="form-input reminder-input" placeholder="默认 (如 09:30)" maxlength="5" list="reminderHistory">
+            <label data-i18n="reminder.timeLabel">提醒时间</label>
+            <input type="text" id="todoReminderInput" class="form-input reminder-input" placeholder="默认 (如 09:30)" data-i18n-placeholder="reminder.defaultHint" maxlength="5" list="reminderHistory">
           </div>
           <div class="form-group">
             <label>Re-remind</label>
@@ -179,8 +179,8 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label>提醒时间</label>
-            <input type="text" id="editTodoReminderInput" class="form-input reminder-input" placeholder="默认 (如 09:30)" maxlength="5" list="reminderHistory">
+            <label data-i18n="reminder.timeLabel">提醒时间</label>
+            <input type="text" id="editTodoReminderInput" class="form-input reminder-input" placeholder="默认 (如 09:30)" data-i18n-placeholder="reminder.defaultHint" maxlength="5" list="reminderHistory">
           </div>
           <div class="form-group">
             <label>Re-remind</label>
@@ -223,6 +223,7 @@
   </div>
 
   <datalist id="reminderHistory"></datalist>
+  <script src="i18n.js"></script>
   <script src="todo-core.js"></script>
   <script src="popup.js"></script>
 </body>

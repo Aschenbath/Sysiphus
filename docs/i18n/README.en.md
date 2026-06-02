@@ -27,7 +27,7 @@
 
 ## Character
 
-Sisyphus is for the tiny recurring things that do not deserve a full project-management system, but also should not live in your head: `明天0930 grab a meal`, `每天2100 grab a meal`, `周五1120 grab a meal`.
+Sisyphus is for the tiny recurring things that do not deserve a full project-management system, but also should not live in your head: `tomorrow 0930 grab a meal`, `daily 2100 grab a meal`, `weekly 1120 grab a meal`.
 
 It opens as a Chrome popup, so it does not pull you into a new tab. After the popup closes, reminders, snoozes, and repeat resets are still scheduled through Chrome alarms.
 
@@ -49,15 +49,15 @@ Daily, weekly, and monthly tasks return to active in the next cycle.
 **Quick Add: One Line In, Structured Fields Out**
 
 <p align="center">
-  <img src="../screenshots/sisyphus-quick-add-demo.gif" width="420" alt="Sisyphus Quick Add parses tomorrow 09:30 meal todo and shows the extracted fields">
+  <img src="../screenshots/en/sisyphus-quick-add-demo.gif" width="420" alt="Sisyphus Quick Add parses tomorrow 09:30 meal todo and shows the extracted fields">
 </p>
 
-`明天0930 干饭` is created through the real popup flow. The list keeps only the task title, `干饭`, while the edit form shows the parsed deadline and reminder time.
+`tomorrow 0930 grab a meal` is created through the real popup flow. The list keeps only the task title, `grab a meal`, while the edit form shows the parsed deadline and reminder time.
 
 **Global Reminder: Manual 24-hour Input**
 
 <p align="center">
-  <img src="../screenshots/sisyphus-reminder-demo.gif" width="420" alt="Sisyphus global reminder panel manual 24-hour input demo">
+  <img src="../screenshots/en/sisyphus-reminder-demo.gif" width="420" alt="Sisyphus global reminder panel manual 24-hour input demo">
 </p>
 
 The bell panel is a separate global daily-reminder setting: enable/disable, default 24-hour time, and Snooze minutes.
@@ -65,19 +65,19 @@ The bell panel is a separate global daily-reminder setting: enable/disable, defa
 ### Full Context
 
 <p align="center">
-  <img src="../screenshots/sisyphus-main.png" width="760" alt="Sisyphus browser popup">
+  <img src="../screenshots/en/sisyphus-main.png" width="760" alt="Sisyphus browser popup">
   <br>
   <sub>Browser popup</sub>
 </p>
 
 <p align="center">
-  <img src="../screenshots/sisyphus-compose.png" width="760" alt="Sisyphus Quick Add">
+  <img src="../screenshots/en/sisyphus-compose.png" width="760" alt="Sisyphus Quick Add">
   <br>
   <sub>Quick Add</sub>
 </p>
 
 <p align="center">
-  <img src="../screenshots/sisyphus-notification.png" width="760" alt="Sisyphus Chrome notification actions">
+  <img src="../screenshots/en/sisyphus-notification.png" width="760" alt="Sisyphus Chrome notification actions">
   <br>
   <sub>Chrome notification Snooze / Done</sub>
 </p>
@@ -88,31 +88,31 @@ The bell panel is a separate global daily-reminder setting: enable/disable, defa
 #### Default Main List: Header Controls Hidden
 
 <p align="center">
-  <img src="../screenshots/sisyphus-clean-main.png" width="420" alt="Sisyphus clean default main list screenshot">
+  <img src="../screenshots/en/sisyphus-clean-main.png" width="420" alt="Sisyphus clean default main list screenshot">
 </p>
 
 #### Header Hidden / Visible
 
 <p align="center">
-  <img src="../screenshots/sisyphus-clean-header.png" width="820" alt="Sisyphus header hidden and visible comparison">
+  <img src="../screenshots/en/sisyphus-clean-header.png" width="820" alt="Sisyphus header hidden and visible comparison">
 </p>
 
 #### Quick Add Form
 
 <p align="center">
-  <img src="../screenshots/sisyphus-clean-quick-add.png" width="420" alt="Sisyphus clean Quick Add form screenshot">
+  <img src="../screenshots/en/sisyphus-clean-quick-add.png" width="420" alt="Sisyphus clean Quick Add form screenshot">
 </p>
 
 #### Daily Reminder Panel
 
 <p align="center">
-  <img src="../screenshots/sisyphus-clean-reminder.png" width="420" alt="Sisyphus clean daily reminder panel screenshot">
+  <img src="../screenshots/en/sisyphus-clean-reminder.png" width="420" alt="Sisyphus clean daily reminder panel screenshot">
 </p>
 
 #### Notification Actions
 
 <p align="center">
-  <img src="../screenshots/sisyphus-clean-notification.png" width="560" alt="Sisyphus clean notification Snooze and Done screenshot">
+  <img src="../screenshots/en/sisyphus-clean-notification.png" width="560" alt="Sisyphus clean notification Snooze and Done screenshot">
 </p>
 
 </details>
@@ -130,7 +130,7 @@ Every capability lives in the table below. It stays collapsed to keep the main f
 | Local-first | Todos, reminders, title, quote, and view state are stored in `chrome.storage.local`. |
 | Custom app title | Double-click `Sisyphus` to rename the app; Enter/blur saves, Esc cancels, blank resets. |
 | Custom quote | The footer quote stays at the bottom of the popup; double-click to edit quote and author. |
-| Natural-language Quick Add | `明天0930 grab a meal`, `每天2100 grab a meal`, and `12300217 grab a meal` become structured todos. |
+| Natural-language Quick Add | `tomorrow 0930 grab a meal`, `daily 2100 grab a meal`, and `12300217 grab a meal` become structured todos. |
 | 8-digit shorthand | `MMDDHHMM title` records date and time in one compact token. |
 | Optional deadline | Set or clear a deadline when creating or editing a todo. |
 | Per-task reminders | Each todo can have its own reminder time; empty uses the global reminder time. |
@@ -157,11 +157,11 @@ Quick Add is a lightweight natural-language parser for everyday todos. Write one
 The 8-digit shorthand is `MMDDHHMM title`: month, day, 24-hour hour, minute, then the task title. It uses the current year.
 
 ```text
-明天0930 grab a meal
-后天0600 grab a meal
-后天 0600 grab a meal
-每天2100 grab a meal
-周五1120 grab a meal
+tomorrow 0930 grab a meal
+today 0600 grab a meal
+daily 2100 grab a meal
+weekly 1120 grab a meal
+monthly 0900 grab a meal
 0930 grab a meal
 12300217 grab a meal
 06041200 grab a meal
@@ -170,17 +170,17 @@ grab a meal
 
 | Input | Parsed structure | Task title |
 | --- | --- | --- |
-| `明天0930 grab a meal` | due date = tomorrow, reminder = 09:30 | `grab a meal` |
-| `后天0600 grab a meal` | due date = day after tomorrow, reminder = 06:00 | `grab a meal` |
-| `后天 0600 grab a meal` | due date = day after tomorrow, reminder = 06:00 | `grab a meal` |
-| `每天2100 grab a meal` | repeat = daily, reminder = 21:00 | `grab a meal` |
-| `周五1120 grab a meal` | due date = next Friday, reminder = 11:20 | `grab a meal` |
+| `tomorrow 0930 grab a meal` | due date = tomorrow, reminder = 09:30 | `grab a meal` |
+| `today 0600 grab a meal` | due date = today, reminder = 06:00 | `grab a meal` |
+| `daily 2100 grab a meal` | repeat = daily, reminder = 21:00 | `grab a meal` |
+| `weekly 1120 grab a meal` | repeat = weekly, reminder = 11:20 | `grab a meal` |
+| `monthly 0900 grab a meal` | repeat = monthly, reminder = 09:00 | `grab a meal` |
 | `0930 grab a meal` | reminder = 09:30 | `grab a meal` |
 | `12300217 grab a meal` | due date = Dec 30 this year, reminder = 02:17 | `grab a meal` |
 | `06041200 grab a meal` | due date = Jun 4 this year, reminder = 12:00 | `grab a meal` |
 | `grab a meal` | no date or reminder extracted | `grab a meal` |
 
-Supported tokens include `今天`, `明天`, `后天`, `周一` to `周日`, `星期一` to `星期日`, `每天`, `每周`, `每月`, `HHMM`, `HH:MM`, and `MMDDHHMM title`.
+Supported tokens include `today`, `tomorrow`, `daily`, `weekly`, `monthly`, `HHMM`, `HH:MM`, and `MMDDHHMM title`. Chinese, Japanese, and Korean date words (for example `明日`, `내일`, `毎日`) are recognized too.
 
 ## Repeat Rollover
 
@@ -206,7 +206,7 @@ You do not need to memorize these. Open the guide when you want to know how a sp
 | Click `+` | Open the add form. |
 | Press `Enter` inside the add form | Create the todo. |
 | Use an IME and press `Enter` while composing | Composition is protected; it will not submit early. |
-| Type `后天0600 grab a meal` | Parse the day after tomorrow and 06:00, keeping the rest as the title. |
+| Type `today 0600 grab a meal` | Parse today and 06:00, keeping the rest as the title. |
 | Type `12300217 grab a meal` | Parse `MMDDHHMM title` as Dec 30, 02:17, this year. |
 | Click the deadline `x` | Clear the date. |
 | Type `0930` in reminder time | Normalize to `09:30`. |
