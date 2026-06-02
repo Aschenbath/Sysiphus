@@ -5,8 +5,8 @@
 <h1 align="center">Sisyphus</h1>
 
 <p align="center">
-  一个安静、可靠、local-first 的 Chrome 待办 / 打卡 / 提醒插件。<br>
-  适合每天重复出现的小 ritual、临时提醒、Snooze、Done，以及真正会回来的 Repeat。
+  一个住在 Chrome 工具栏里的待办 / 打卡 / 提醒插件。<br>
+  写下小事，等它到点，点掉它；明天该回来的，会自己回来。
 </p>
 
 <p align="center">
@@ -24,6 +24,21 @@
 </p>
 
 ---
+
+## 它的性格
+
+Sisyphus 适合那些不值得打开一整套项目管理工具、又不该被脑子硬扛的小事：`明天0930 干饭`、`每天2100 干饭`、`周五1120 干饭`。
+它是 popup 形式的插件，点一下扩展图标就出现；关掉 popup 后，提醒和 repeat 仍然交给 Chrome alarms 在后台守着。
+
+它没有账号、没有云端、没有 dashboard，也没有把日常小事做成一间办公室。它更像浏览器角落里的一个小石头：今天推上去，明天还会在原地等你。
+
+**最值得看的三件事：**
+
+| 事情 | Sisyphus 怎么处理 |
+| --- | --- |
+| 想得快，懒得填表 | Quick Add 会从一整句里拆出日期、时间、repeat 和任务名。 |
+| 到点时 popup 没开 | 后台 alarm 继续排程，Chrome 通知给 `Snooze` 和 `Done`。 |
+| 重复任务不是一次性打勾 | daily / weekly / monthly 完成后会在下一周期重新变回未完成。 |
 
 ## 截图
 
@@ -73,36 +88,40 @@
   <img src="docs/screenshots/sisyphus-clean-notification.png" width="560" alt="Sisyphus 通知 Snooze 和 Done 干净截图">
 </p>
 
-## 产品亮点
+## 功能地图
 
 | 能力 | 说明 |
 | --- | --- |
-| Popup-first | 点击扩展图标直接打开待办列表，不跳转新页面。 |
-| Local-first | 待办、提醒、标题、quote 和视图状态保存在 `chrome.storage.local`。 |
-| 自定义应用名 | 双击左上角 `Sisyphus` 即可改名；Enter/blur 保存，Esc 取消，空值回到默认名。 |
-| 自定义 quote | 双击底部 quote 区域，可修改 quote 和 author；Enter/blur 保存，Esc 取消。 |
-| 自然语言 Quick Add | 输入 `明天0930 干饭` 或 `12300217 干饭`，自动拆出日期、提醒时间、repeat 和任务名。 |
-| 可选 Deadline | 新增和编辑时都可设置或清空截止日期。 |
-| 每任务提醒 | 每条 todo 可单独设置提醒时间；为空时使用全局提醒时间。 |
-| 全局提醒面板 | 右上角铃铛设置 daily reminder 开关、默认提醒时间和 Snooze 分钟数。 |
-| Snooze / Done | Chrome 通知支持稍后提醒和后台直接完成。 |
-| Re-remind | 单条任务可设置到点后再次提醒间隔。 |
-| Repeat 真循环 | daily / weekly / monthly 完成后会在下一周期恢复为未完成。 |
-| Repeat-only 视图 | 右上角眼睛按钮可只看重复任务，状态会持久化。 |
-| 置顶 | 置顶任务排在前方，并用低噪音左侧细线标识。 |
-| 安静操作按钮 | 置顶、删除、铃铛、眼睛等工具默认弱化，hover/focus 才出现。 |
-| 完成后淡出 | 普通任务完成后约 60 秒淡出并从列表移除。 |
-| 自动日夜主题 | 18:00 到 06:00 使用暗色，其余时间使用亮色。 |
-| 全局快捷键 | 默认建议快捷键为 `Alt+Shift+S`。 |
+| Popup-first | 点击扩展图标直接打开 360px popup，不跳转新页面，不打断当前浏览。 |
+| Local-first | 待办、提醒、标题、quote、视图状态都保存在 `chrome.storage.local`。 |
+| 自定义应用名 | 双击左上角标题即可改名；Enter/blur 保存，Esc 取消，空值回到 `Sisyphus`。 |
+| 自定义 quote | 底部 quote 固定在 popup 尾部；双击可分别修改 quote 和 author。 |
+| 自然语言 Quick Add | `明天0930 干饭`、`每天2100 干饭`、`12300217 干饭` 都能被拆成结构化字段。 |
+| 8 位数字速记 | `MMDDHHMM 任务名` 直接写日期和时间，例如 `06041200 干饭`。 |
+| 可选 Deadline | 新建、编辑时都能设置截止日期；日期右侧 `x` 可以清空。 |
+| 每任务提醒 | 每条 todo 可单独设置提醒时间；留空时走全局默认提醒时间。 |
+| 提醒历史 | 最近 3 个提醒时间会自动留下，下一次不用重新输入。 |
+| 全局提醒面板 | 右上角铃铛里设置 daily reminder 开关、默认时间、Snooze 分钟数。 |
+| Snooze / Done | Chrome 通知上可延后提醒，也可不打开 popup 直接标记完成。 |
+| Re-remind | 单条任务到点后还没完成，可按 `5m / 10m / 15m / 30m` 再提醒。 |
+| 后台排程 | popup 关闭后，提醒、snooze、repeat reset 仍由 background alarm 继续排。 |
+| Repeat 真循环 | daily / weekly / monthly 任务完成后，会在下一周期恢复为未完成。 |
+| Repeat-only 视图 | 眼睛按钮只看重复任务；切换状态会被保存，下次打开仍记得。 |
+| 置顶 | 重要任务排在前方，用一条低噪音左侧细线标识。 |
+| 安静操作按钮 | header 的眼睛、铃铛、加号，以及任务上的置顶/删除，都按 hover/focus 显形。 |
+| 完成后淡出 | 普通任务完成后约 60 秒淡出并从列表移除，避免完成项堆成噪音。 |
+| 逾期提示 | 逾期任务只用左侧视觉提示，不用夸张红色打扰。 |
+| 自动日夜主题 | 18:00 到 06:00 暗色，其余时间亮色，跟随本地时间自动切换。 |
+| 全局快捷键 | 默认建议快捷键为 `Alt+Shift+S`，也可在 Chrome 扩展快捷键页改。 |
 
 ## 快速开始
 
 1. 点击扩展图标，或使用 `Alt+Shift+S`。
 2. 点击右上角 `+`。
-3. 像发消息一样输入普通任务，或直接输入 `明天0930 干饭` / `12300217 干饭` 这类 Quick Add。
+3. 像发消息一样输入普通任务，或直接输入 `明天0930 干饭` / `每天2100 干饭` / `12300217 干饭`。
 4. 需要时设置 Deadline / Repeat / Reminder / Re-remind。
-5. 到点后 Chrome 桌面通知会出现。
-6. 通知上可选择 `Snooze` 或 `Done`。
+5. 关掉 popup 也没关系，到点后 Chrome 桌面通知会出现。
+6. 通知上可选择 `Snooze` 或 `Done`；重复任务完成后会等下一轮回来。
 
 ## 细节操作
 

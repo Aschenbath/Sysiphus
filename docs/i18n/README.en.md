@@ -5,8 +5,8 @@
 <h1 align="center">Sisyphus</h1>
 
 <p align="center">
-  A quiet, reliable, local-first Chrome todo / check-in / reminder extension.<br>
-  Built for daily rituals, small reminders, Snooze, Done, and repeat tasks that actually return.
+  A todo, check-in, and reminder popup that lives in the Chrome toolbar.<br>
+  Write the small thing, let it wait, check it off; the tasks meant to return will return.
 </p>
 
 <p align="center">
@@ -17,6 +17,18 @@
 </p>
 
 ---
+
+## Character
+
+Sisyphus is for the tiny recurring things that do not deserve a full project-management system, but also should not live in your head: `明天0930 grab a meal`, `每天2100 grab a meal`, `周五1120 grab a meal`.
+
+It opens as a Chrome popup, so it does not pull you into a new tab. After the popup closes, reminders, snoozes, and repeat resets are still scheduled through Chrome alarms.
+
+| Situation | What Sisyphus does |
+| --- | --- |
+| You want to type fast | Quick Add extracts date, time, repeat, and title from one line. |
+| The popup is closed | Background alarms still trigger Chrome notifications with `Snooze` and `Done`. |
+| A repeat task is completed | Daily, weekly, and monthly tasks return in the next cycle. |
 
 ## Screenshots
 
@@ -70,21 +82,25 @@
 
 | Feature | Details |
 | --- | --- |
-| Popup-first | The extension icon opens the complete todo surface directly. |
+| Popup-first | The extension icon opens a 360px todo popup without navigating away. |
 | Local-first | Todos, reminders, title, quote, and view state are stored in `chrome.storage.local`. |
 | Custom app title | Double-click `Sisyphus` to rename the app; Enter/blur saves, Esc cancels, blank resets. |
-| Custom quote | Double-click the footer quote to edit the quote and author. |
-| Natural-language Quick Add | Type `明天0930 grab a meal` or `12300217 grab a meal`; Sisyphus extracts date, reminder time, repeat, and keeps the remaining words as the task title. |
+| Custom quote | The footer quote stays at the bottom of the popup; double-click to edit quote and author. |
+| Natural-language Quick Add | `明天0930 grab a meal`, `每天2100 grab a meal`, and `12300217 grab a meal` become structured todos. |
+| 8-digit shorthand | `MMDDHHMM title` records date and time in one compact token. |
 | Optional deadline | Set or clear a deadline when creating or editing a todo. |
 | Per-task reminders | Each todo can have its own reminder time; empty uses the global reminder time. |
+| Reminder history | The latest three reminder times are kept for quick reuse. |
 | Global reminder panel | Bell menu controls daily reminder, default time, and Snooze minutes. |
 | Snooze / Done | Chrome notifications can snooze a task or mark it done in the background. |
 | Re-remind | A task can remind again after 5, 10, 15, or 30 minutes. |
+| Background scheduling | Reminders, snoozes, and repeat resets keep working after the popup closes. |
 | Real repeat rollover | Daily, weekly, and monthly todos return to active in the next cycle. |
 | Repeat-only view | The eye button filters to repeating todos and remembers that view. |
 | Pinning | Pinned todos sort first and use a quiet left rail. |
-| Quiet controls | Pin, delete, bell, and eye controls stay low-noise until hover/focus. |
+| Quiet controls | Header controls and row actions stay low-noise until hover/focus. |
 | Completed fade-out | Normal completed todos fade out after about 60 seconds. |
+| Overdue hint | Overdue tasks use a quiet left-side visual hint. |
 | Auto day/night theme | Dark from 18:00 to 06:00, light during the day. |
 | Shortcut | Suggested shortcut: `Alt+Shift+S`. |
 
@@ -95,9 +111,12 @@
 | Click `+` | Open the add form. |
 | Press `Enter` inside the add form | Create the todo. |
 | Use an IME and press `Enter` while composing | Composition is protected; it will not submit early. |
+| Type `后天0600 grab a meal` | Parse the day after tomorrow and 06:00, keeping the rest as the title. |
+| Type `12300217 grab a meal` | Parse `MMDDHHMM title` as Dec 30, 02:17, this year. |
 | Click the deadline `x` | Clear the date. |
 | Type `0930` in reminder time | Normalize to `09:30`. |
 | Use reminder history | Reuse one of the latest three reminder times. |
+| Choose Re-remind | Remind again after the selected interval if the todo remains open. |
 | Click the todo circle | Complete or uncomplete the todo. |
 | Click todo text | Open inline editing below the current item. |
 | Click outside edit form | Collapse the edit form. |

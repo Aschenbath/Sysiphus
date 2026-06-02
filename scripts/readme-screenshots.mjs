@@ -925,23 +925,23 @@ async function main() {
 
     await captureHtml(port, composeHtml({
       title: 'Popup 形式的待办插件',
-      lead: '点击 Chrome 工具栏图标即可打开完整待办、打卡和提醒界面，右上角功能栏在需要时出现。',
+      lead: '小事写进工具栏，不占新页面；到点由 Chrome 通知敲一下，做完就安静退场。',
       chips: ['Local-first', 'Hover toolbar', 'Repeat view'],
       popupImage: fullToolbarPopup,
       mode: 'main'
     }), path.join(outputDir, 'sisyphus-main.png'));
 
     await captureHtml(port, composeHtml({
-      title: '自然语言一行创建',
-      lead: '`明天0930 干饭` 会被拆成日期、提醒时间和任务名，再用手动字段补足 Repeat 和 Re-remind。',
+      title: '像发消息一样创建任务',
+      lead: '`明天0930 干饭` 会被拆成日期、提醒时间和任务名，Repeat 与 Re-remind 再手动补上一刀。',
       chips: ['Quick Add', 'Deadline', 'Re-remind'],
       popupImage: quickAddPopup,
       mode: 'compose'
     }), path.join(outputDir, 'sisyphus-compose.png'));
 
     await captureHtml(port, composeHtml({
-      title: '到点后不用打开页面',
-      lead: 'Chrome 通知直接给出 Snooze / Done，popup 关闭后仍由 background alarm 排程。',
+      title: '到点后不用开 popup',
+      lead: 'Snooze 先放一放，Done 直接收掉；popup 关闭后，background alarm 继续守着下一次。',
       chips: ['Chrome alarms', 'Snooze', 'Done'],
       popupImage: mainPopup,
       mode: 'main',

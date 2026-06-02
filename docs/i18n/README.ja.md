@@ -5,8 +5,8 @@
 <h1 align="center">Sisyphus</h1>
 
 <p align="center">
-  静かで信頼できる local-first の Chrome todo / チェックイン / リマインダー拡張です。<br>
-  毎日の小さな習慣、短いリマインダー、Snooze、Done、そして本当に戻ってくる Repeat に対応します。
+  Chrome ツールバーに住む todo / check-in / reminder popup。<br>
+  小さな用事を書き、時間まで預け、終わったら消す。戻るべきタスクは、次の周期に戻ってきます。
 </p>
 
 <p align="center">
@@ -17,6 +17,18 @@
 </p>
 
 ---
+
+## 性格
+
+Sisyphus は、大きなタスク管理ツールを開くほどではないけれど、頭の中に置き続けるには少し重い用事のための拡張です。`明天0930 ごはんを食べる`、`每天2100 ごはんを食べる`、`周五1120 ごはんを食べる` のように、1 行で書けます。
+
+Chrome popup として開くので、新しいタブに移動する必要はありません。popup を閉じても、reminder、snooze、repeat reset は Chrome alarms がバックグラウンドで扱います。
+
+| 場面 | Sisyphus の動き |
+| --- | --- |
+| すばやく書きたい | Quick Add が 1 行から日付、時刻、repeat、タスク名を取り出します。 |
+| popup を閉じている | background alarm が通知を出し、`Snooze` と `Done` を表示します。 |
+| repeat task を完了した | daily / weekly / monthly が次の周期で未完了に戻ります。 |
 
 ## スクリーンショット
 
@@ -70,22 +82,27 @@
 
 | 機能 | 説明 |
 | --- | --- |
-| Popup-first | 拡張アイコンから todo 画面を直接開きます。 |
+| Popup-first | 拡張アイコンから 360px の todo popup を直接開きます。 |
 | Local-first | todos、reminders、title、quote、view state は `chrome.storage.local` に保存されます。 |
 | アプリ名変更 | 左上の `Sisyphus` をダブルクリックして名前を変更できます。Enter/blur で保存、Esc でキャンセル、空なら既定名に戻ります。 |
-| quote 変更 | フッターの quote をダブルクリックして quote と author を編集できます。 |
-| 自然言語 Quick Add | `明天0930 ごはんを食べる` や `12300217 ごはんを食べる` を入力すると、日付・リマインダー時刻・repeat・タスク名を自動で切り分けます。 |
+| quote 変更 | footer quote は popup 下部に固定。ダブルクリックで quote と author を編集できます。 |
+| 自然言語 Quick Add | `明天0930 ごはんを食べる`、`每天2100 ごはんを食べる`、`12300217 ごはんを食べる` を構造化 todo にします。 |
+| 8 桁速記 | `MMDDHHMM title` で日付と時刻をまとめて書けます。 |
 | 任意の Deadline | 作成・編集時に deadline を設定またはクリアできます。 |
 | タスク別 Reminder | 各 todo に個別の reminder time を設定できます。空なら global time を使用。 |
+| Reminder history | 直近 3 件の reminder time を残し、再利用しやすくします。 |
 | Global reminder panel | ベルから daily reminder、default time、Snooze minutes を設定。 |
 | Snooze / Done | Chrome 通知から延期または完了できます。 |
 | Re-remind | 5 / 10 / 15 / 30 分後の再通知に対応。 |
+| Background scheduling | popup を閉じても reminders、snoozes、repeat resets は動き続けます。 |
 | Repeat rollover | daily / weekly / monthly の todo は次の周期で active に戻ります。 |
 | Repeat-only view | 目のボタンで repeat todo だけを表示し、その状態を記憶します。 |
 | Pinning | ピン留めした todo を上に表示し、左の細線で示します。 |
-| Quiet controls | pin、delete、bell、eye は hover/focus まで控えめに表示されます。 |
+| Quiet controls | header controls と row actions は hover/focus まで控えめに隠れます。 |
 | Completed fade-out | 通常 todo は完了後およそ 60 秒でフェードアウトします。 |
+| Overdue hint | 期限切れ todo は左側の静かな表示で示します。 |
 | 自動テーマ | 18:00 から 06:00 は dark、それ以外は light。 |
+| Shortcut | 推奨ショートカットは `Alt+Shift+S`。 |
 
 ## 操作
 
@@ -94,9 +111,12 @@
 | `+` をクリック | 追加フォームを開きます。 |
 | 追加フォームで `Enter` | todo を作成します。 |
 | IME 変換中に `Enter` | 誤送信しないよう保護されています。 |
+| `后天0600 ごはんを食べる` | 明後日と 06:00 を解析し、残りをタスク名にします。 |
+| `12300217 ごはんを食べる` | `MMDDHHMM title` として、今年 12/30 02:17 に解析します。 |
 | Deadline の `x` | 日付をクリアします。 |
 | Reminder に `0930` | `09:30` に正規化します。 |
 | Reminder history | 直近 3 件の reminder time を再利用できます。 |
+| Re-remind を選ぶ | 未完了のままなら選んだ間隔で再通知します。 |
 | todo の丸をクリック | 完了 / 未完了を切り替えます。 |
 | todo テキストをクリック | その下に inline edit form を開きます。 |
 | 編集フォームの外をクリック | 編集フォームを閉じます。 |
