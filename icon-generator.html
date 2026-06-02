@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Icon Generator</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: #f5f5f5;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .icon-preview {
+      margin: 20px;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    canvas {
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+    }
+    button {
+      padding: 12px 24px;
+      background: #2c3e50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      margin: 10px;
+    }
+    button:hover {
+      background: #1a252f;
+    }
+    .instructions {
+      max-width: 500px;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      margin-top: 20px;
+    }
+    h2 {
+      margin-bottom: 10px;
+      color: #2c3e50;
+    }
+    p {
+      color: #666;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="icon-preview">
+    <h2>Quick Todo Icon</h2>
+    <canvas id="icon128" width="128" height="128"></canvas>
+  </div>
+
+  <button onclick="downloadIcon()">Download icon.png</button>
+
+  <div class="instructions">
+    <h2>使用说明</h2>
+    <p>1. 点击上方按钮下载图标</p>
+    <p>2. 将下载的 icon.png 放到 D:\Codex\todo-extension\ 目录</p>
+    <p>3. 在浏览器中重新加载插件即可</p>
+  </div>
+
+  <script>
+    function drawIcon() {
+      const canvas = document.getElementById('icon128');
+      const ctx = canvas.getContext('2d');
+
+      // Background - white
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, 128, 128);
+
+      // Black rounded square - larger
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 10;
+      ctx.beginPath();
+      ctx.roundRect(16, 16, 96, 96, 20);
+      ctx.stroke();
+
+      // Checkmark - larger and thicker
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 12;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      ctx.beginPath();
+      ctx.moveTo(38, 64);
+      ctx.lineTo(56, 82);
+      ctx.lineTo(90, 46);
+      ctx.stroke();
+    }
+
+    function downloadIcon() {
+      const canvas = document.getElementById('icon128');
+      const link = document.createElement('a');
+      link.download = 'icon.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    drawIcon();
+  </script>
+</body>
+</html>

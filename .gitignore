@@ -1,0 +1,8 @@
+history.md
+*.crx
+*.pem
+*.zip
+*.log
+*.tmp
+*.bak
+node_modules/

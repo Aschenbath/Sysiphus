@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "Sisyphus",
+  "version": "1.0.3",
+  "description": "A simple and clean todo list extension",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Sisyphus"
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": { "default": "Alt+Shift+S" },
+      "description": "打开 Sisyphus"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;"
+  },
+  "permissions": [
+    "storage",
+    "alarms",
+    "notifications"
+  ],
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  }
+}
