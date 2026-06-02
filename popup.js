@@ -19,8 +19,7 @@ const clearEditDueDateBtn = document.getElementById('clearEditDueDateBtn');
 const reminderBtn = document.getElementById('reminderBtn');
 const reminderPanel = document.getElementById('reminderPanel');
 const reminderToggle = document.getElementById('reminderToggle');
-const reminderHour = document.getElementById('reminderHour');
-const reminderMinute = document.getElementById('reminderMinute');
+const reminderTimeInput = document.getElementById('reminderTimeInput');
 const snoozeMinutes = document.getElementById('snoozeMinutes');
 const todoReminderInput = document.getElementById('todoReminderInput');
 const editTodoReminderInput = document.getElementById('editTodoReminderInput');
@@ -90,19 +89,6 @@ function applyTheme() {
 }
 
 // ---------- Daily reminder settings ----------
-// Build a 24-hour time picker from two <select>s so the format never follows
-// the browser's 12-hour locale.
-function fillTimeSelect(sel, count) {
-  for (let i = 0; i < count; i++) {
-    const opt = document.createElement('option');
-    opt.value = String(i).padStart(2, '0');
-    opt.textContent = String(i).padStart(2, '0');
-    sel.appendChild(opt);
-  }
-}
-fillTimeSelect(reminderHour, 24);
-fillTimeSelect(reminderMinute, 60);
-
 function setTodoReminderField(input, val) {
   input.value = val || '';
 }
@@ -268,31 +254,23 @@ function normalizeTodoIds() {
   return changed;
 }
 
-function setTimeSelects(hourSel, minuteSel, hhmm) {
-  const [h, m] = (hhmm || '20:00').split(':');
-  hourSel.value = String(parseInt(h, 10) || 0).padStart(2, '0');
-  minuteSel.value = String(parseInt(m, 10) || 0).padStart(2, '0');
-}
-
-function getTimeSelects(hourSel, minuteSel) {
-  return `${hourSel.value}:${minuteSel.value}`;
-}
-
 loadReminderSettings();
 
 function loadReminderSettings() {
   chrome.storage.local.get(['reminderEnabled', 'reminderTime', 'snoozeMinutes'], (res) => {
     reminderToggle.checked = res.reminderEnabled !== false; // default ON
-    setTimeSelects(reminderHour, reminderMinute, res.reminderTime || '20:00');
+    reminderTimeInput.value = parseReminderInput(res.reminderTime || '20:00') || '20:00';
     snoozeMinutes.value = String(clampSnoozeMinutes(res.snoozeMinutes));
   });
 }
 
 function saveReminderSettings() {
+  const reminderTime = parseReminderInput(reminderTimeInput.value) || '20:00';
+  reminderTimeInput.value = reminderTime;
   chrome.storage.local.set(
     {
       reminderEnabled: reminderToggle.checked,
-      reminderTime: getTimeSelects(reminderHour, reminderMinute),
+      reminderTime,
       snoozeMinutes: clampSnoozeMinutes(snoozeMinutes.value)
     },
     () => {
@@ -307,8 +285,16 @@ reminderBtn.addEventListener('click', (e) => {
 });
 
 reminderToggle.addEventListener('change', saveReminderSettings);
-reminderHour.addEventListener('change', saveReminderSettings);
-reminderMinute.addEventListener('change', saveReminderSettings);
+reminderTimeInput.addEventListener('input', () => {
+  formatReminderInput(reminderTimeInput);
+});
+reminderTimeInput.addEventListener('blur', saveReminderSettings);
+reminderTimeInput.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter') return;
+  e.preventDefault();
+  e.stopPropagation();
+  reminderTimeInput.blur();
+});
 snoozeMinutes.addEventListener('change', saveReminderSettings);
 
 // close the panel when clicking outside it
@@ -334,6 +320,7 @@ cancelEditBtn.addEventListener('click', hideEditForm);
 
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Enter') return;
+  if (e.target && e.target.closest('#reminderPanel')) return;
   if (addTodoForm.classList.contains('hidden')) return;
   if (e.isComposing) return;
   if (e.target && e.target.closest('#editTodoForm')) return;

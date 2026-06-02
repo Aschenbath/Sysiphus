@@ -225,6 +225,13 @@ h1.editing {
   outline: none;
 }
 
+.reminder-time-input {
+  width: 76px;
+  text-align: center;
+  cursor: text;
+  font-variant-numeric: tabular-nums;
+}
+
 .time-field:focus {
   border-color: #2c3e50;
 }

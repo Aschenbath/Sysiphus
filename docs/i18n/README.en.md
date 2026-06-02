@@ -32,6 +32,12 @@ It opens as a Chrome popup, so it does not pull you into a new tab. After the po
 
 ## Screenshots
 
+### Demo
+
+<p align="center">
+  <img src="../screenshots/sisyphus-demo.gif" width="420" alt="Sisyphus popup quick add and manual 24-hour reminder input demo">
+</p>
+
 ### Full Context
 
 #### Browser Popup
@@ -91,7 +97,7 @@ It opens as a Chrome popup, so it does not pull you into a new tab. After the po
 | Optional deadline | Set or clear a deadline when creating or editing a todo. |
 | Per-task reminders | Each todo can have its own reminder time; empty uses the global reminder time. |
 | Reminder history | The latest three reminder times are kept for quick reuse. |
-| Global reminder panel | Bell menu controls daily reminder, default time, and Snooze minutes. |
+| Global reminder panel | Bell menu controls daily reminder, manual 24-hour default time, and Snooze minutes. |
 | Snooze / Done | Chrome notifications can snooze a task or mark it done in the background. |
 | Re-remind | A task can remind again after 5, 10, 15, or 30 minutes. |
 | Background scheduling | Reminders, snoozes, and repeat resets keep working after the popup closes. |
@@ -115,6 +121,7 @@ It opens as a Chrome popup, so it does not pull you into a new tab. After the po
 | Type `12300217 grab a meal` | Parse `MMDDHHMM title` as Dec 30, 02:17, this year. |
 | Click the deadline `x` | Clear the date. |
 | Type `0930` in reminder time | Normalize to `09:30`. |
+| Type `0930` / `09:30` / `20:00` in global reminder settings | Save a manual 24-hour default time without opening a native dropdown. |
 | Use reminder history | Reuse one of the latest three reminder times. |
 | Choose Re-remind | Remind again after the selected interval if the todo remains open. |
 | Click the todo circle | Complete or uncomplete the todo. |

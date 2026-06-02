@@ -32,6 +32,12 @@ Chrome popup 으로 열리기 때문에 새 탭으로 이동하지 않습니다.
 
 ## Screenshots
 
+### 데모
+
+<p align="center">
+  <img src="../screenshots/sisyphus-demo.gif" width="420" alt="Sisyphus popup quick add and manual 24-hour reminder input demo">
+</p>
+
 ### 전체 맥락
 
 #### 브라우저 Popup
@@ -91,7 +97,7 @@ Chrome popup 으로 열리기 때문에 새 탭으로 이동하지 않습니다.
 | 선택적 Deadline | 생성/수정 시 deadline 을 설정하거나 지울 수 있습니다. |
 | 작업별 Reminder | 각 todo 가 고유한 reminder time 을 가질 수 있고, 비어 있으면 global time 을 사용합니다. |
 | Reminder history | 최근 3개의 reminder time 을 남겨 다시 쓰기 쉽게 합니다. |
-| Global reminder panel | 종 버튼에서 daily reminder, default time, Snooze minutes 를 설정합니다. |
+| Global reminder panel | 종 버튼에서 daily reminder, 수동 24시간제 default time, Snooze minutes 를 설정합니다. |
 | Snooze / Done | Chrome 알림에서 미루기 또는 완료 처리를 할 수 있습니다. |
 | Re-remind | 5 / 10 / 15 / 30 분 후 다시 알릴 수 있습니다. |
 | Background scheduling | popup 이 닫혀도 reminders, snoozes, repeat resets 는 계속 예약됩니다. |
@@ -115,6 +121,7 @@ Chrome popup 으로 열리기 때문에 새 탭으로 이동하지 않습니다.
 | `12300217 밥 먹기` 입력 | `MMDDHHMM title` 로 올해 12/30 02:17 을 파싱합니다. |
 | Deadline 의 `x` | 날짜를 지웁니다. |
 | Reminder 에 `0930` 입력 | `09:30` 으로 정규화합니다. |
+| Global reminder settings 에 `0930` / `09:30` / `20:00` 입력 | native dropdown 없이 24시간제 default time 으로 저장합니다. |
 | Reminder history | 최근 3개의 reminder time 을 재사용합니다. |
 | Re-remind 선택 | 완료되지 않으면 선택한 간격으로 다시 알립니다. |
 | todo 원 클릭 | 완료 / 미완료를 전환합니다. |

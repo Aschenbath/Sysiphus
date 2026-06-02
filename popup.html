@@ -49,9 +49,7 @@
       <div class="reminder-row">
         <span class="reminder-label">提醒时间</span>
         <div class="time-select">
-          <select id="reminderHour" class="time-field" aria-label="小时"></select>
-          <span class="time-colon">:</span>
-          <select id="reminderMinute" class="time-field" aria-label="分钟"></select>
+          <input type="text" id="reminderTimeInput" class="time-field reminder-time-input" aria-label="提醒时间，24 小时制" placeholder="20:00" maxlength="5" inputmode="numeric" autocomplete="off">
         </div>
       </div>
       <div class="reminder-row">

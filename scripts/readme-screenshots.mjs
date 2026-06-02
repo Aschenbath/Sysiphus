@@ -263,6 +263,18 @@ function writeDataUrlPng(dataUrl, outPath) {
   writeFileSync(outPath, Buffer.from(base64, 'base64'));
 }
 
+async function writeFrame(client, frameDir, frameIndex, repeats = 1) {
+  const shot = await client.send('Page.captureScreenshot', {
+    format: 'png',
+    fromSurface: true
+  });
+  for (let i = 0; i < repeats; i++) {
+    const framePath = path.join(frameDir, `frame-${String(frameIndex + i).padStart(4, '0')}.png`);
+    writeFileSync(framePath, Buffer.from(shot.data, 'base64'));
+  }
+  return frameIndex + repeats;
+}
+
 function popupPolishScript(theme, { revealHeader = false, revealRows = false } = {}) {
   return `
     (() => {
@@ -476,6 +488,105 @@ async function capturePopup(port, {
   const shot = await client.send('Page.captureScreenshot', screenshotParams);
   client.close();
   return `data:image/png;base64,${shot.data}`;
+}
+
+async function captureDemoGif(port, outPath) {
+  const frameDir = path.join(tmpdir(), `sisyphus-demo-frames-${process.pid}`);
+  rmSync(frameDir, { recursive: true, force: true });
+  mkdirSync(frameDir, { recursive: true });
+
+  const client = await openPage(port);
+  let frame = 0;
+  try {
+    await client.send('Emulation.setDeviceMetricsOverride', {
+      width: 360,
+      height: 600,
+      deviceScaleFactor: 1,
+      mobile: false
+    });
+    await client.send('Page.addScriptToEvaluateOnNewDocument', {
+      source: chromeStorageMockScript(storage)
+    });
+    await navigate(client, popupUrl);
+    await evaluate(client, `new Promise(resolve => setTimeout(resolve, 250))`);
+    await evaluate(client, popupPolishScript('light', { revealHeader: false, revealRows: false }));
+
+    frame = await writeFrame(client, frameDir, frame, 8);
+
+    await evaluate(client, `
+      (() => {
+        const style = document.createElement('style');
+        style.textContent = '.header-actions { opacity: 1 !important; pointer-events: auto !important; }';
+        document.head.appendChild(style);
+      })();
+    `);
+    frame = await writeFrame(client, frameDir, frame, 8);
+
+    await evaluate(client, `
+      (() => {
+        document.getElementById('addTodoForm').classList.remove('hidden');
+        document.querySelector('#addTodoForm .extra-fields').classList.add('show');
+        document.getElementById('todoInput').focus();
+      })();
+    `);
+    frame = await writeFrame(client, frameDir, frame, 6);
+
+    const quickText = '明天0930 干饭';
+    for (let i = 1; i <= quickText.length; i++) {
+      await evaluate(client, `
+        (() => {
+          document.getElementById('todoInput').value = ${JSON.stringify(quickText.slice(0, i))};
+        })();
+      `);
+      frame = await writeFrame(client, frameDir, frame, i === quickText.length ? 8 : 2);
+    }
+
+    await evaluate(client, `
+      (() => {
+        document.getElementById('reminderPanel').classList.remove('hidden');
+        document.getElementById('reminderToggle').checked = true;
+        document.getElementById('reminderTimeInput').value = '';
+        document.getElementById('snoozeMinutes').value = '10';
+      })();
+    `);
+    frame = await writeFrame(client, frameDir, frame, 6);
+
+    for (const value of ['2', '20', '200', '2000', '20:00']) {
+      await evaluate(client, `
+        (() => {
+          document.getElementById('reminderTimeInput').value = ${JSON.stringify(value)};
+        })();
+      `);
+      frame = await writeFrame(client, frameDir, frame, value === '20:00' ? 12 : 2);
+    }
+  } finally {
+    client.close();
+  }
+
+  await new Promise((resolve, reject) => {
+    const inputPattern = path.join(frameDir, 'frame-%04d.png');
+    const ffmpeg = spawn('ffmpeg', [
+      '-y',
+      '-framerate', '8',
+      '-i', inputPattern,
+      '-vf', 'fps=8,scale=360:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=128[p];[s1][p]paletteuse=dither=bayer:bayer_scale=3',
+      outPath
+    ], {
+      stdio: ['ignore', 'ignore', 'pipe'],
+      windowsHide: true
+    });
+    let stderr = '';
+    ffmpeg.stderr.on('data', chunk => {
+      stderr += chunk.toString();
+    });
+    ffmpeg.on('error', reject);
+    ffmpeg.on('close', code => {
+      if (code === 0) resolve();
+      else reject(new Error(`ffmpeg failed with code ${code}: ${stderr}`));
+    });
+  });
+
+  rmSync(frameDir, { recursive: true, force: true });
 }
 
 function composeHtml({ title, lead, chips, popupImage, mode = 'main', notification = false }) {
@@ -911,8 +1022,7 @@ async function main() {
         (async () => {
           document.getElementById('reminderPanel').classList.remove('hidden');
           document.getElementById('reminderToggle').checked = true;
-          document.getElementById('reminderHour').value = '09';
-          document.getElementById('reminderMinute').value = '30';
+          document.getElementById('reminderTimeInput').value = '09:30';
           document.getElementById('snoozeMinutes').value = '10';
         })();
       `
@@ -957,6 +1067,7 @@ async function main() {
       width: 980,
       height: 330
     });
+    await captureDemoGif(port, path.join(outputDir, 'sisyphus-demo.gif'));
   } finally {
     chrome.kill();
     await delay(200);
