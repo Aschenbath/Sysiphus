@@ -73,6 +73,18 @@ test('reminder-time field commits the form on Enter', () => {
   );
 });
 
+test('clicking anywhere on a todo row opens the inline editor', () => {
+  // The edit click must be bound to the whole .todo-item row, not just
+  // .todo-content. Otherwise the padding, the flex gaps, and the invisible
+  // actions column on the right are dead zones even though the row shows a
+  // pointer cursor.
+  const start = popupJs.indexOf("querySelectorAll('.todo-item')");
+  assert.notEqual(start, -1, 'edit click should be bound to .todo-item');
+  const block = popupJs.slice(start, start + 400);
+  assert.match(block, /addEventListener\('click'/);
+  assert.match(block, /showEditForm\(todo\)/);
+});
+
 test('README demos split real Quick Add parsing from global reminder settings', () => {
   assert.match(readme, /sisyphus-quick-add-demo\.gif/);
   assert.match(readme, /sisyphus-reminder-demo\.gif/);

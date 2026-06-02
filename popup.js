@@ -888,8 +888,13 @@ function renderTodos() {
     });
   });
 
-  document.querySelectorAll('.todo-content').forEach(content => {
-    content.addEventListener('click', (e) => {
+  // Clicking anywhere on the row opens the inline editor. The checkbox, pin,
+  // and delete controls each stopPropagation, so they never reach this handler.
+  // (Attaching to .todo-content alone left the padding, the flex gaps, and the
+  // invisible actions column on the right as dead zones even though the whole
+  // row shows a pointer cursor.)
+  document.querySelectorAll('.todo-item').forEach(item => {
+    item.addEventListener('click', (e) => {
       e.stopPropagation();
       const id = e.currentTarget.dataset.id;
       const todo = todos.find(t => String(t.id) === String(id));
