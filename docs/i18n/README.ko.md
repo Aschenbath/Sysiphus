@@ -32,7 +32,7 @@
 | Local-first | todos, reminders, title, quote, view state 는 `chrome.storage.local` 에 저장됩니다. |
 | 앱 이름 변경 | 왼쪽 위 `Sisyphus` 를 더블 클릭해 이름을 바꿀 수 있습니다. Enter/blur 저장, Esc 취소, 빈 값은 기본 이름으로 돌아갑니다. |
 | quote 변경 | footer quote 를 더블 클릭해 quote 와 author 를 수정할 수 있습니다. |
-| Quick Add | 중국어 날짜, 짧은 시간 표기, repeat prefix, `MMDDHHMM title` 을 지원합니다. |
+| 자연어 Quick Add | `明天0930 吃饭` 또는 `12300217 吃饭` 을 입력하면 날짜, reminder time, repeat, task title 을 자동으로 분리합니다. |
 | 선택적 Deadline | 생성/수정 시 deadline 을 설정하거나 지울 수 있습니다. |
 | 작업별 Reminder | 각 todo 가 고유한 reminder time 을 가질 수 있고, 비어 있으면 global time 을 사용합니다. |
 | Global reminder panel | 종 버튼에서 daily reminder, default time, Snooze minutes 를 설정합니다. |
@@ -62,27 +62,35 @@
 | 종 클릭 | global reminder settings 를 엽니다. |
 | 눈 클릭 | all / repeat-only view 를 전환합니다. |
 
-## Quick Add
+## 자연어 Quick Add
+
+Quick Add 는 일상 todo 를 위한 가벼운 자연어 파서입니다. 메시지를 쓰듯 한 줄로 입력하면 Sisyphus 가 인식 가능한 날짜, 시간, repeat 를 구조화된 필드로 바꾸고, 남은 텍스트를 task title 로 유지합니다.
+
+8자리 shorthand 는 `MMDDHHMM title` 입니다. 월, 일, 24시간제 시, 분, 그리고 task title 을 뜻하며, 연도는 현재 연도를 사용합니다.
 
 ```text
-明天0930 复习 JVM
-后天0600 起床
-每天2100 背单词
-周五1120 复习JUC
-0930 Read JVM notes
-12300217 起床
-普通任务
+明天0930 吃饭
+后天0600 吃饭
+后天 0600 吃饭
+每天2100 吃饭
+周五1120 吃饭
+0930 吃饭
+12300217 吃饭
+06041200 吃饭
+吃饭
 ```
 
-| 입력 | 파싱 결과 |
-| --- | --- |
-| `明天0930 复习 JVM` | due date = tomorrow, reminder = 09:30 |
-| `后天0600 起床` | due date = day after tomorrow, reminder = 06:00 |
-| `每天2100 背单词` | repeat = daily, reminder = 21:00 |
-| `周五1120 复习JUC` | due date = next Friday, reminder = 11:20 |
-| `0930 Read JVM notes` | reminder = 09:30 |
-| `12300217 起床` | due date = this year's 12/30, reminder = 02:17 |
-| `普通任务` | plain todo text |
+| 입력 | 파싱 결과 | Task title |
+| --- | --- | --- |
+| `明天0930 吃饭` | due date = tomorrow, reminder = 09:30 | `吃饭` |
+| `后天0600 吃饭` | due date = day after tomorrow, reminder = 06:00 | `吃饭` |
+| `后天 0600 吃饭` | due date = day after tomorrow, reminder = 06:00 | `吃饭` |
+| `每天2100 吃饭` | repeat = daily, reminder = 21:00 | `吃饭` |
+| `周五1120 吃饭` | due date = next Friday, reminder = 11:20 | `吃饭` |
+| `0930 吃饭` | reminder = 09:30 | `吃饭` |
+| `12300217 吃饭` | due date = this year's 12/30, reminder = 02:17 | `吃饭` |
+| `06041200 吃饭` | due date = this year's 06/04, reminder = 12:00 | `吃饭` |
+| `吃饭` | 날짜나 알림을 추출하지 않는 plain todo | `吃饭` |
 
 지원 token: `今天`, `明天`, `后天`, `周一` 부터 `周日`, `星期一` 부터 `星期日`, `每天`, `每周`, `每月`, `HHMM`, `HH:MM`, `MMDDHHMM title`.
 

@@ -32,7 +32,7 @@
 | Local-first | todos、reminders、title、quote、view state は `chrome.storage.local` に保存されます。 |
 | アプリ名変更 | 左上の `Sisyphus` をダブルクリックして名前を変更できます。Enter/blur で保存、Esc でキャンセル、空なら既定名に戻ります。 |
 | quote 変更 | フッターの quote をダブルクリックして quote と author を編集できます。 |
-| Quick Add | 中国語の日付、短縮時刻、repeat prefix、`MMDDHHMM title` に対応。 |
+| 自然言語 Quick Add | `明天0930 吃饭` や `12300217 吃饭` を入力すると、日付・リマインダー時刻・repeat・タスク名を自動で切り分けます。 |
 | 任意の Deadline | 作成・編集時に deadline を設定またはクリアできます。 |
 | タスク別 Reminder | 各 todo に個別の reminder time を設定できます。空なら global time を使用。 |
 | Global reminder panel | ベルから daily reminder、default time、Snooze minutes を設定。 |
@@ -62,27 +62,35 @@
 | ベルをクリック | global reminder settings を開きます。 |
 | 目をクリック | all / repeat-only view を切り替えます。 |
 
-## Quick Add
+## 自然言語 Quick Add
+
+Quick Add は日常の todo 向けの軽量な自然言語パーサーです。メッセージを書くように 1 行で入力すると、Sisyphus が認識できる日付、時刻、repeat を構造化フィールドに変換し、残りのテキストをタスク名として残します。
+
+8 桁の速記は `MMDDHHMM title` です。月、日、24 時間制の時、分、そしてタスク名という意味で、年は現在の年を使います。
 
 ```text
-明天0930 复习 JVM
-后天0600 起床
-每天2100 背单词
-周五1120 复习JUC
-0930 Read JVM notes
-12300217 起床
-普通任务
+明天0930 吃饭
+后天0600 吃饭
+后天 0600 吃饭
+每天2100 吃饭
+周五1120 吃饭
+0930 吃饭
+12300217 吃饭
+06041200 吃饭
+吃饭
 ```
 
-| 入力 | 解析結果 |
-| --- | --- |
-| `明天0930 复习 JVM` | due date = tomorrow、reminder = 09:30 |
-| `后天0600 起床` | due date = day after tomorrow、reminder = 06:00 |
-| `每天2100 背单词` | repeat = daily、reminder = 21:00 |
-| `周五1120 复习JUC` | due date = next Friday、reminder = 11:20 |
-| `0930 Read JVM notes` | reminder = 09:30 |
-| `12300217 起床` | due date = 今年 12/30、reminder = 02:17 |
-| `普通任务` | 通常の todo text |
+| 入力 | 解析結果 | タスク名 |
+| --- | --- | --- |
+| `明天0930 吃饭` | due date = tomorrow、reminder = 09:30 | `吃饭` |
+| `后天0600 吃饭` | due date = day after tomorrow、reminder = 06:00 | `吃饭` |
+| `后天 0600 吃饭` | due date = day after tomorrow、reminder = 06:00 | `吃饭` |
+| `每天2100 吃饭` | repeat = daily、reminder = 21:00 | `吃饭` |
+| `周五1120 吃饭` | due date = next Friday、reminder = 11:20 | `吃饭` |
+| `0930 吃饭` | reminder = 09:30 | `吃饭` |
+| `12300217 吃饭` | due date = 今年 12/30、reminder = 02:17 | `吃饭` |
+| `06041200 吃饭` | due date = 今年 06/04、reminder = 12:00 | `吃饭` |
+| `吃饭` | 日付や時刻を抽出せず、通常の todo として作成 | `吃饭` |
 
 対応 token: `今天`, `明天`, `后天`, `周一` から `周日`, `星期一` から `星期日`, `每天`, `每周`, `每月`, `HHMM`, `HH:MM`, `MMDDHHMM title`。
 

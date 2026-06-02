@@ -32,7 +32,7 @@
 | Local-first | Todos, reminders, title, quote, and view state are stored in `chrome.storage.local`. |
 | Custom app title | Double-click `Sisyphus` to rename the app; Enter/blur saves, Esc cancels, blank resets. |
 | Custom quote | Double-click the footer quote to edit the quote and author. |
-| Quick Add | Supports Chinese date tokens, compact times, repeat prefixes, and `MMDDHHMM title`. |
+| Natural-language Quick Add | Type `明天0930 吃饭` or `12300217 吃饭`; Sisyphus extracts date, reminder time, repeat, and keeps the remaining words as the task title. |
 | Optional deadline | Set or clear a deadline when creating or editing a todo. |
 | Per-task reminders | Each todo can have its own reminder time; empty uses the global reminder time. |
 | Global reminder panel | Bell menu controls daily reminder, default time, and Snooze minutes. |
@@ -63,27 +63,35 @@
 | Click the bell | Open global reminder settings. |
 | Click the eye | Toggle all todos / repeat-only view. |
 
-## Quick Add
+## Natural-language Quick Add
+
+Quick Add is a lightweight natural-language parser for everyday todos. Write one line like a message; Sisyphus turns recognizable date, reminder, and repeat fragments into structured fields, then leaves the rest as the todo title.
+
+The 8-digit shorthand is `MMDDHHMM title`: month, day, 24-hour hour, minute, then the task title. It uses the current year.
 
 ```text
-明天0930 复习 JVM
-后天0600 起床
-每天2100 背单词
-周五1120 复习JUC
-0930 Read JVM notes
-12300217 起床
-普通任务
+明天0930 吃饭
+后天0600 吃饭
+后天 0600 吃饭
+每天2100 吃饭
+周五1120 吃饭
+0930 吃饭
+12300217 吃饭
+06041200 吃饭
+吃饭
 ```
 
-| Input | Parsed result |
-| --- | --- |
-| `明天0930 复习 JVM` | due date = tomorrow, reminder = 09:30, text = 复习 JVM |
-| `后天0600 起床` | due date = day after tomorrow, reminder = 06:00 |
-| `每天2100 背单词` | repeat = daily, reminder = 21:00 |
-| `周五1120 复习JUC` | due date = next Friday, reminder = 11:20 |
-| `0930 Read JVM notes` | reminder = 09:30 |
-| `12300217 起床` | due date = Dec 30 this year, reminder = 02:17 |
-| `普通任务` | plain todo text |
+| Input | Parsed structure | Task title |
+| --- | --- | --- |
+| `明天0930 吃饭` | due date = tomorrow, reminder = 09:30 | `吃饭` |
+| `后天0600 吃饭` | due date = day after tomorrow, reminder = 06:00 | `吃饭` |
+| `后天 0600 吃饭` | due date = day after tomorrow, reminder = 06:00 | `吃饭` |
+| `每天2100 吃饭` | repeat = daily, reminder = 21:00 | `吃饭` |
+| `周五1120 吃饭` | due date = next Friday, reminder = 11:20 | `吃饭` |
+| `0930 吃饭` | reminder = 09:30 | `吃饭` |
+| `12300217 吃饭` | due date = Dec 30 this year, reminder = 02:17 | `吃饭` |
+| `06041200 吃饭` | due date = Jun 4 this year, reminder = 12:00 | `吃饭` |
+| `吃饭` | no date or reminder extracted | `吃饭` |
 
 Supported tokens include `今天`, `明天`, `后天`, `周一` to `周日`, `星期一` to `星期日`, `每天`, `每周`, `每月`, `HHMM`, `HH:MM`, and `MMDDHHMM title`.
 
