@@ -490,79 +490,7 @@ async function capturePopup(port, {
   return `data:image/png;base64,${shot.data}`;
 }
 
-async function captureDemoGif(port, outPath) {
-  const frameDir = path.join(tmpdir(), `sisyphus-demo-frames-${process.pid}`);
-  rmSync(frameDir, { recursive: true, force: true });
-  mkdirSync(frameDir, { recursive: true });
-
-  const client = await openPage(port);
-  let frame = 0;
-  try {
-    await client.send('Emulation.setDeviceMetricsOverride', {
-      width: 360,
-      height: 600,
-      deviceScaleFactor: 1,
-      mobile: false
-    });
-    await client.send('Page.addScriptToEvaluateOnNewDocument', {
-      source: chromeStorageMockScript(storage)
-    });
-    await navigate(client, popupUrl);
-    await evaluate(client, `new Promise(resolve => setTimeout(resolve, 250))`);
-    await evaluate(client, popupPolishScript('light', { revealHeader: false, revealRows: false }));
-
-    frame = await writeFrame(client, frameDir, frame, 8);
-
-    await evaluate(client, `
-      (() => {
-        const style = document.createElement('style');
-        style.textContent = '.header-actions { opacity: 1 !important; pointer-events: auto !important; }';
-        document.head.appendChild(style);
-      })();
-    `);
-    frame = await writeFrame(client, frameDir, frame, 8);
-
-    await evaluate(client, `
-      (() => {
-        document.getElementById('addTodoForm').classList.remove('hidden');
-        document.querySelector('#addTodoForm .extra-fields').classList.add('show');
-        document.getElementById('todoInput').focus();
-      })();
-    `);
-    frame = await writeFrame(client, frameDir, frame, 6);
-
-    const quickText = '明天0930 干饭';
-    for (let i = 1; i <= quickText.length; i++) {
-      await evaluate(client, `
-        (() => {
-          document.getElementById('todoInput').value = ${JSON.stringify(quickText.slice(0, i))};
-        })();
-      `);
-      frame = await writeFrame(client, frameDir, frame, i === quickText.length ? 8 : 2);
-    }
-
-    await evaluate(client, `
-      (() => {
-        document.getElementById('reminderPanel').classList.remove('hidden');
-        document.getElementById('reminderToggle').checked = true;
-        document.getElementById('reminderTimeInput').value = '';
-        document.getElementById('snoozeMinutes').value = '10';
-      })();
-    `);
-    frame = await writeFrame(client, frameDir, frame, 6);
-
-    for (const value of ['2', '20', '200', '2000', '20:00']) {
-      await evaluate(client, `
-        (() => {
-          document.getElementById('reminderTimeInput').value = ${JSON.stringify(value)};
-        })();
-      `);
-      frame = await writeFrame(client, frameDir, frame, value === '20:00' ? 12 : 2);
-    }
-  } finally {
-    client.close();
-  }
-
+async function renderGifFromFrames(frameDir, outPath) {
   await new Promise((resolve, reject) => {
     const inputPattern = path.join(frameDir, 'frame-%04d.png');
     const ffmpeg = spawn('ffmpeg', [
@@ -585,7 +513,159 @@ async function captureDemoGif(port, outPath) {
       else reject(new Error(`ffmpeg failed with code ${code}: ${stderr}`));
     });
   });
+}
 
+async function captureQuickAddDemoGif(port, outPath) {
+  const frameDir = path.join(tmpdir(), `sisyphus-quick-add-demo-frames-${process.pid}`);
+  rmSync(frameDir, { recursive: true, force: true });
+  mkdirSync(frameDir, { recursive: true });
+
+  const client = await openPage(port);
+  let frame = 0;
+  try {
+    await client.send('Emulation.setDeviceMetricsOverride', {
+      width: 360,
+      height: 600,
+      deviceScaleFactor: 1,
+      mobile: false
+    });
+    await client.send('Page.addScriptToEvaluateOnNewDocument', {
+      source: chromeStorageMockScript({
+        ...storage,
+        todos: [],
+        reminderHistory: [],
+        reminderTime: '20:00',
+        todoViewMode: 'all'
+      })
+    });
+    await navigate(client, popupUrl);
+    await evaluate(client, `new Promise(resolve => setTimeout(resolve, 250))`);
+    await evaluate(client, popupPolishScript('light', { revealHeader: false, revealRows: false }));
+
+    frame = await writeFrame(client, frameDir, frame, 7);
+
+    await evaluate(client, `
+      (() => {
+        const style = document.createElement('style');
+        style.textContent = '.header-actions { opacity: 1 !important; pointer-events: auto !important; }';
+        document.head.appendChild(style);
+        document.getElementById('addBtn').click();
+        const extra = document.querySelector('#addTodoForm .extra-fields');
+        if (extra) extra.classList.add('show');
+        document.getElementById('todoInput').focus();
+      })();
+    `);
+    frame = await writeFrame(client, frameDir, frame, 6);
+
+    const quickText = '明天0930 干饭';
+    for (let i = 1; i <= quickText.length; i++) {
+      await evaluate(client, `
+        (() => {
+          document.getElementById('todoInput').value = ${JSON.stringify(quickText.slice(0, i))};
+        })();
+      `);
+      frame = await writeFrame(client, frameDir, frame, i === quickText.length ? 7 : 2);
+    }
+
+    await evaluate(client, `
+      (() => {
+        addTodo();
+      })();
+    `);
+    await evaluate(client, `new Promise(resolve => setTimeout(resolve, 120))`);
+    frame = await writeFrame(client, frameDir, frame, 10);
+
+    await evaluate(client, `
+      (() => {
+        if (todos[0]) {
+          showEditForm(todos[0]);
+          const extra = document.querySelector('#editTodoForm .extra-fields');
+          if (extra) extra.classList.add('show');
+        }
+      })();
+    `);
+    await evaluate(client, `new Promise(resolve => setTimeout(resolve, 160))`);
+    frame = await writeFrame(client, frameDir, frame, 14);
+  } finally {
+    client.close();
+  }
+
+  await renderGifFromFrames(frameDir, outPath);
+  rmSync(frameDir, { recursive: true, force: true });
+}
+
+async function captureReminderDemoGif(port, outPath) {
+  const frameDir = path.join(tmpdir(), `sisyphus-reminder-demo-frames-${process.pid}`);
+  rmSync(frameDir, { recursive: true, force: true });
+  mkdirSync(frameDir, { recursive: true });
+
+  const client = await openPage(port);
+  let frame = 0;
+  try {
+    await client.send('Emulation.setDeviceMetricsOverride', {
+      width: 360,
+      height: 600,
+      deviceScaleFactor: 1,
+      mobile: false
+    });
+    await client.send('Page.addScriptToEvaluateOnNewDocument', {
+      source: chromeStorageMockScript({
+        ...storage,
+        reminderTime: '20:00',
+        snoozeMinutes: 10
+      })
+    });
+    await navigate(client, popupUrl);
+    await evaluate(client, `new Promise(resolve => setTimeout(resolve, 250))`);
+    await evaluate(client, popupPolishScript('light', { revealHeader: false, revealRows: false }));
+
+    frame = await writeFrame(client, frameDir, frame, 7);
+
+    await evaluate(client, `
+      (() => {
+        const style = document.createElement('style');
+        style.textContent = '.header-actions { opacity: 1 !important; pointer-events: auto !important; }';
+        document.head.appendChild(style);
+      })();
+    `);
+    frame = await writeFrame(client, frameDir, frame, 6);
+
+    await evaluate(client, `
+      (() => {
+        document.getElementById('reminderBtn').click();
+        document.getElementById('reminderToggle').checked = true;
+        const input = document.getElementById('reminderTimeInput');
+        input.value = '';
+        input.focus();
+        document.getElementById('snoozeMinutes').value = '10';
+      })();
+    `);
+    frame = await writeFrame(client, frameDir, frame, 7);
+
+    for (const value of ['2', '20', '200', '2000']) {
+      await evaluate(client, `
+        (() => {
+          const input = document.getElementById('reminderTimeInput');
+          input.value = ${JSON.stringify(value)};
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        })();
+      `);
+      frame = await writeFrame(client, frameDir, frame, value === '2000' ? 10 : 2);
+    }
+
+    await evaluate(client, `
+      (() => {
+        const input = document.getElementById('reminderTimeInput');
+        input.dispatchEvent(new Event('blur', { bubbles: true }));
+      })();
+    `);
+    await evaluate(client, `new Promise(resolve => setTimeout(resolve, 100))`);
+    frame = await writeFrame(client, frameDir, frame, 10);
+  } finally {
+    client.close();
+  }
+
+  await renderGifFromFrames(frameDir, outPath);
   rmSync(frameDir, { recursive: true, force: true });
 }
 
@@ -1067,7 +1147,8 @@ async function main() {
       width: 980,
       height: 330
     });
-    await captureDemoGif(port, path.join(outputDir, 'sisyphus-demo.gif'));
+    await captureQuickAddDemoGif(port, path.join(outputDir, 'sisyphus-quick-add-demo.gif'));
+    await captureReminderDemoGif(port, path.join(outputDir, 'sisyphus-reminder-demo.gif'));
   } finally {
     chrome.kill();
     await delay(200);

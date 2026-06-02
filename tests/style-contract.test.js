@@ -6,6 +6,8 @@ const test = require('node:test');
 const css = fs.readFileSync(path.join(__dirname, '..', 'styles.css'), 'utf8');
 const popupHtml = fs.readFileSync(path.join(__dirname, '..', 'popup.html'), 'utf8');
 const popupJs = fs.readFileSync(path.join(__dirname, '..', 'popup.js'), 'utf8');
+const readme = fs.readFileSync(path.join(__dirname, '..', 'README.md'), 'utf8');
+const screenshotScript = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'readme-screenshots.mjs'), 'utf8');
 
 function selectorHasDeclaration(selector, declaration) {
   const rulePattern = /([^{}]+)\{([^{}]*)\}/g;
@@ -58,4 +60,21 @@ test('global reminder time uses manual 24-hour input instead of native dropdowns
 
 test('add-form Enter shortcut does not intercept reminder panel fields', () => {
   assert.match(popupJs, /e\.target && e\.target\.closest\('#reminderPanel'\)/);
+});
+
+test('README demos split real Quick Add parsing from global reminder settings', () => {
+  assert.match(readme, /sisyphus-quick-add-demo\.gif/);
+  assert.match(readme, /sisyphus-reminder-demo\.gif/);
+  assert.doesNotMatch(readme, /sisyphus-demo\.gif/);
+});
+
+test('Quick Add demo uses the app flow and does not open global reminder panel', () => {
+  assert.match(screenshotScript, /function captureQuickAddDemoGif/);
+  assert.match(screenshotScript, /function captureReminderDemoGif/);
+  const quickStart = screenshotScript.indexOf('function captureQuickAddDemoGif');
+  const reminderStart = screenshotScript.indexOf('function captureReminderDemoGif');
+  const quickDemo = screenshotScript.slice(quickStart, reminderStart);
+  assert.match(quickDemo, /addTodo\(\)/);
+  assert.match(quickDemo, /showEditForm\(todos\[0\]\)/);
+  assert.doesNotMatch(quickDemo, /reminderPanel/);
 });

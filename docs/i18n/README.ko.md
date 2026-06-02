@@ -34,9 +34,21 @@ Chrome popup 으로 열리기 때문에 새 탭으로 이동하지 않습니다.
 
 ### 데모
 
+#### Quick Add: 한 줄을 구조화된 필드로
+
 <p align="center">
-  <img src="../screenshots/sisyphus-demo.gif" width="420" alt="Sisyphus popup quick add and manual 24-hour reminder input demo">
+  <img src="../screenshots/sisyphus-quick-add-demo.gif" width="420" alt="Sisyphus Quick Add parses tomorrow 09:30 meal todo and shows the extracted fields">
 </p>
+
+`明天0930 干饭` 은 실제 popup flow 로 생성됩니다. 목록에는 task title 인 `干饭` 만 남고, 편집 화면에서는 파싱된 deadline 과 reminder time 을 확인할 수 있습니다.
+
+#### Global Reminder: 24시간 수동 입력
+
+<p align="center">
+  <img src="../screenshots/sisyphus-reminder-demo.gif" width="420" alt="Sisyphus global reminder panel manual 24-hour input demo">
+</p>
+
+벨 패널은 전체 daily reminder 설정입니다. 켜기/끄기, 기본 24시간 시각, Snooze 분을 여기서 다룹니다.
 
 ### 전체 맥락
 
