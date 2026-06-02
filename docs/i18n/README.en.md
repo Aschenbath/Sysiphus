@@ -65,13 +65,21 @@ The bell panel is a separate global daily-reminder setting: enable/disable, defa
 ### Full Context
 
 <p align="center">
-  <img src="../screenshots/sisyphus-main.png" width="280" alt="Sisyphus browser popup">
-  <img src="../screenshots/sisyphus-compose.png" width="280" alt="Sisyphus Quick Add">
-  <img src="../screenshots/sisyphus-notification.png" width="280" alt="Sisyphus Chrome notification actions">
+  <img src="../screenshots/sisyphus-main.png" width="760" alt="Sisyphus browser popup">
+  <br>
+  <sub>Browser popup</sub>
 </p>
 
 <p align="center">
-  <sub>Browser popup · Quick Add · Chrome notification Snooze / Done</sub>
+  <img src="../screenshots/sisyphus-compose.png" width="760" alt="Sisyphus Quick Add">
+  <br>
+  <sub>Quick Add</sub>
+</p>
+
+<p align="center">
+  <img src="../screenshots/sisyphus-notification.png" width="760" alt="Sisyphus Chrome notification actions">
+  <br>
+  <sub>Chrome notification Snooze / Done</sub>
 </p>
 
 <details>

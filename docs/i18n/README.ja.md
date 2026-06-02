@@ -65,13 +65,21 @@ daily / weekly / monthly は次の周期で active に戻ります。
 ### 全体コンテキスト
 
 <p align="center">
-  <img src="../screenshots/sisyphus-main.png" width="280" alt="Sisyphus browser popup">
-  <img src="../screenshots/sisyphus-compose.png" width="280" alt="Sisyphus Quick Add">
-  <img src="../screenshots/sisyphus-notification.png" width="280" alt="Sisyphus Chrome notification actions">
+  <img src="../screenshots/sisyphus-main.png" width="760" alt="Sisyphus browser popup">
+  <br>
+  <sub>ブラウザ Popup</sub>
 </p>
 
 <p align="center">
-  <sub>ブラウザ Popup · Quick Add · Chrome 通知 Snooze / Done</sub>
+  <img src="../screenshots/sisyphus-compose.png" width="760" alt="Sisyphus Quick Add">
+  <br>
+  <sub>Quick Add</sub>
+</p>
+
+<p align="center">
+  <img src="../screenshots/sisyphus-notification.png" width="760" alt="Sisyphus Chrome notification actions">
+  <br>
+  <sub>Chrome 通知 Snooze / Done</sub>
 </p>
 
 <details>
