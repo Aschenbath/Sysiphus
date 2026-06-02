@@ -20,17 +20,17 @@
 
 ## Screenshots
 
-### Browser Popup
+### Full Context
 
-![Sisyphus browser popup](../screenshots/sisyphus-main.png)
+| Browser popup | Quick Add + toolbar | Chrome notification Snooze / Done |
+| --- | --- | --- |
+| ![Sisyphus browser popup](../screenshots/sisyphus-main.png) | ![Sisyphus Quick Add and reminder panel](../screenshots/sisyphus-compose.png) | ![Sisyphus Chrome notification actions](../screenshots/sisyphus-notification.png) |
 
-### Quick Add, Toolbar, And Reminder Panel
+### Clean Detail Views
 
-![Sisyphus Quick Add and reminder panel](../screenshots/sisyphus-compose.png)
-
-### Chrome Notification Snooze / Done
-
-![Sisyphus Chrome notification actions](../screenshots/sisyphus-notification.png)
+| Main list close-up | Quick Add and reminder panel close-up | Notification action close-up |
+| --- | --- | --- |
+| <img src="../screenshots/sisyphus-clean-main.png" width="280" alt="Sisyphus clean main list screenshot"> | <img src="../screenshots/sisyphus-clean-compose.png" width="280" alt="Sisyphus clean Quick Add and reminder panel screenshot"> | <img src="../screenshots/sisyphus-clean-notification.png" width="360" alt="Sisyphus clean notification Snooze and Done screenshot"> |
 
 ## Highlights
 

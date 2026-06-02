@@ -20,17 +20,17 @@
 
 ## Screenshots
 
-### 브라우저 Popup
+### 전체 맥락
 
-![Sisyphus browser popup](../screenshots/sisyphus-main.png)
+| 브라우저 Popup | Quick Add + 툴바 | Chrome 알림 Snooze / Done |
+| --- | --- | --- |
+| ![Sisyphus browser popup](../screenshots/sisyphus-main.png) | ![Sisyphus Quick Add and reminder panel](../screenshots/sisyphus-compose.png) | ![Sisyphus Chrome notification actions](../screenshots/sisyphus-notification.png) |
 
-### Quick Add, Toolbar, Reminder Panel
+### 시각적 노이즈를 줄인 세부 화면
 
-![Sisyphus Quick Add and reminder panel](../screenshots/sisyphus-compose.png)
-
-### Chrome Notification Snooze / Done
-
-![Sisyphus Chrome notification actions](../screenshots/sisyphus-notification.png)
+| 메인 목록 close-up | Quick Add와 알림 패널 close-up | 알림 버튼 close-up |
+| --- | --- | --- |
+| <img src="../screenshots/sisyphus-clean-main.png" width="280" alt="Sisyphus main list close-up"> | <img src="../screenshots/sisyphus-clean-compose.png" width="280" alt="Sisyphus Quick Add and reminder panel close-up"> | <img src="../screenshots/sisyphus-clean-notification.png" width="360" alt="Sisyphus notification Snooze and Done close-up"> |
 
 ## 주요 기능
 

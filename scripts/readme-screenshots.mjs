@@ -258,6 +258,11 @@ function chromeStorageMockScript(initialStorage) {
   `;
 }
 
+function writeDataUrlPng(dataUrl, outPath) {
+  const base64 = dataUrl.replace(/^data:image\/png;base64,/, '');
+  writeFileSync(outPath, Buffer.from(base64, 'base64'));
+}
+
 function popupPolishScript(theme) {
   return `
     (() => {
@@ -289,6 +294,97 @@ function popupPolishScript(theme) {
       if (list) list.scrollTop = 0;
     })();
   `;
+}
+
+function cleanNotificationHtml() {
+  return `<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    width: 760px;
+    height: 360px;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    background: #f5f7f3;
+    font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    color: #243241;
+  }
+  .notification {
+    width: 520px;
+    border: 1px solid #d7ded8;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 18px 48px rgba(35, 45, 52, 0.18);
+    overflow: hidden;
+  }
+  .head {
+    height: 56px;
+    padding: 0 18px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    border-bottom: 1px solid #edf0ed;
+    color: #68747d;
+    font-size: 13px;
+    font-weight: 750;
+  }
+  .head img {
+    width: 25px;
+    height: 25px;
+  }
+  .body {
+    padding: 24px 24px 20px;
+  }
+  .title {
+    margin: 0 0 9px;
+    font-family: Georgia, "Times New Roman", "Microsoft YaHei", serif;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.15;
+    color: #22313f;
+  }
+  .message {
+    margin: 0;
+    color: #59656f;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-top: 1px solid #edf0ed;
+  }
+  button {
+    height: 50px;
+    border: 0;
+    background: #ffffff;
+    color: #263746;
+    font-size: 15px;
+    font-weight: 800;
+  }
+  button + button {
+    border-left: 1px solid #edf0ed;
+    color: #3f7f64;
+  }
+</style>
+</head>
+<body>
+  <section class="notification">
+    <div class="head"><img src="${iconData}" alt="">Sisyphus · Chrome notification</div>
+    <div class="body">
+      <h1 class="title">干饭</h1>
+      <p class="message">到提醒时间后，可直接 Snooze，或在后台标记 Done。</p>
+    </div>
+    <div class="actions"><button>Snooze</button><button>Done</button></div>
+  </section>
+</body>
+</html>`;
 }
 
 async function capturePopup(port, { theme = 'light', prepare = '' } = {}) {
@@ -422,11 +518,7 @@ function composeHtml({ title, lead, chips, popupImage, mode = 'main', notificati
     position: relative;
     height: 660px;
     padding: 58px 56px;
-    background:
-      linear-gradient(#e7ede7 1px, transparent 1px),
-      linear-gradient(90deg, #e7ede7 1px, transparent 1px),
-      #fbfcf9;
-    background-size: 42px 42px;
+    background: #fbfcf9;
   }
   .copy {
     width: 470px;
@@ -593,11 +685,7 @@ function composeHtml({ title, lead, chips, popupImage, mode = 'main', notificati
     color: #3f7f64;
   }
   .mode-compose .content {
-    background:
-      linear-gradient(#2d3137 1px, transparent 1px),
-      linear-gradient(90deg, #2d3137 1px, transparent 1px),
-      #1f2328;
-    background-size: 42px 42px;
+    background: #1f2328;
   }
   .mode-compose h1,
   .mode-compose .copy {
@@ -668,11 +756,11 @@ function composeHtml({ title, lead, chips, popupImage, mode = 'main', notificati
 </html>`;
 }
 
-async function captureHtml(port, html, outPath) {
+async function captureHtml(port, html, outPath, { width = 1280, height = 820 } = {}) {
   const client = await openPage(port);
   await client.send('Emulation.setDeviceMetricsOverride', {
-    width: 1280,
-    height: 820,
+    width,
+    height,
     deviceScaleFactor: 1,
     mobile: false
   });
@@ -741,6 +829,8 @@ async function main() {
         })();
       `
     });
+    writeDataUrlPng(mainPopup, path.join(outputDir, 'sisyphus-clean-main.png'));
+    writeDataUrlPng(composePopup, path.join(outputDir, 'sisyphus-clean-compose.png'));
 
     await captureHtml(port, composeHtml({
       title: '点一下图标，待办直接弹出来',
@@ -766,6 +856,11 @@ async function main() {
       mode: 'main',
       notification: true
     }), path.join(outputDir, 'sisyphus-notification.png'));
+
+    await captureHtml(port, cleanNotificationHtml(), path.join(outputDir, 'sisyphus-clean-notification.png'), {
+      width: 760,
+      height: 360
+    });
   } finally {
     chrome.kill();
     await delay(200);

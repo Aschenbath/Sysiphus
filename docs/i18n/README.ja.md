@@ -20,17 +20,17 @@
 
 ## スクリーンショット
 
-### ブラウザ Popup
+### 全体コンテキスト
 
-![Sisyphus browser popup](../screenshots/sisyphus-main.png)
+| ブラウザ Popup | Quick Add + ツールバー | Chrome 通知の Snooze / Done |
+| --- | --- | --- |
+| ![Sisyphus browser popup](../screenshots/sisyphus-main.png) | ![Sisyphus Quick Add and reminder panel](../screenshots/sisyphus-compose.png) | ![Sisyphus Chrome notification actions](../screenshots/sisyphus-notification.png) |
 
-### Quick Add、ツールバー、リマインダー設定
+### ノイズを抑えた詳細
 
-![Sisyphus Quick Add and reminder panel](../screenshots/sisyphus-compose.png)
-
-### Chrome 通知の Snooze / Done
-
-![Sisyphus Chrome notification actions](../screenshots/sisyphus-notification.png)
+| メインリスト close-up | Quick Add とリマインダー設定 close-up | 通知ボタン close-up |
+| --- | --- | --- |
+| <img src="../screenshots/sisyphus-clean-main.png" width="280" alt="Sisyphus main list close-up"> | <img src="../screenshots/sisyphus-clean-compose.png" width="280" alt="Sisyphus Quick Add and reminder panel close-up"> | <img src="../screenshots/sisyphus-clean-notification.png" width="360" alt="Sisyphus notification Snooze and Done close-up"> |
 
 ## 主な機能
 
