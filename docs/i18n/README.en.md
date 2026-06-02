@@ -174,13 +174,3 @@ Sisyphus requires no account, connects to no backend service, and includes no an
 4. Click Load unpacked.
 5. Select the `todo-extension` folder.
 6. Optional: change the shortcut at `chrome://extensions/shortcuts`. The suggested shortcut is `Alt+Shift+S`.
-
-## Development Checks
-
-```bash
-node --test tests\todo-core.test.js tests\reminder-input.test.js tests\reminder-history.test.js tests\script-scope.test.js tests\background-reschedule.test.js tests\background-notification.test.js
-node --check popup.js
-node --check background.js
-node --check todo-core.js
-node scripts\readme-screenshots.mjs
-```

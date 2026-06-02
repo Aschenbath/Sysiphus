@@ -285,9 +285,6 @@ function popupPolishScript(theme, { revealHeader = false, revealRows = false } =
         .todo-item:hover {
           transform: none !important;
         }
-        .quote-footer {
-          padding-top: 12px !important;
-        }
       \`;
       document.head.appendChild(style);
       const list = document.querySelector('.todo-list');
@@ -927,8 +924,8 @@ async function main() {
     writeDataUrlPng(reminderPopup, path.join(outputDir, 'sisyphus-clean-reminder.png'));
 
     await captureHtml(port, composeHtml({
-      title: '点一下图标，待办直接弹出来',
-      lead: 'Sisyphus 保持在 Chrome popup 里，打开就能看、能打卡，右上角的功能栏在需要时出现。',
+      title: 'Popup 形式的待办插件',
+      lead: '点击 Chrome 工具栏图标即可打开完整待办、打卡和提醒界面，右上角功能栏在需要时出现。',
       chips: ['Local-first', 'Hover toolbar', 'Repeat view'],
       popupImage: fullToolbarPopup,
       mode: 'main'
