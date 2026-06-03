@@ -220,7 +220,10 @@ function parseQuickAdd(input, now = new Date()) {
 }
 
 function isTodoOverdue(todo, now = new Date()) {
-  if (!todo || todo.completed || !todo.dueDate) return false;
+  // Repeat todos roll their dueDate forward on each completed cycle, so a not-yet-
+  // completed cycle still sitting on a past dueDate is just "today's turn", not
+  // overdue. A daily/weekly/monthly task therefore never shows the overdue hint.
+  if (!todo || todo.completed || isRepeatTodo(todo) || !todo.dueDate) return false;
   const due = normalizeDate(new Date(todo.dueDate));
   return due.getTime() < normalizeDate(now).getTime();
 }

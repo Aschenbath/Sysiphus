@@ -4,6 +4,7 @@ const {
   clampSnoozeMinutes,
   filterTodosForView,
   formatDateDisplay,
+  isTodoOverdue,
   mergeMissingTodos,
   nextRepeatResetTime,
   normalizeAppTitle,
@@ -170,6 +171,24 @@ const sorted = sortTodosForDisplay([
 ], now).map(t => t.id);
 
 assert.deepStrictEqual(sorted, ['d', 'b', 'c', 'a']);
+
+// Overdue: only non-repeat, not-completed, past-due todos count. Repeat todos roll
+// their dueDate forward each cycle, so a stale dueDate must NOT flag them overdue.
+assert.strictEqual(isTodoOverdue({ dueDate: '2026-05-31' }, now), true);                    // non-repeat past due
+assert.strictEqual(isTodoOverdue({ dueDate: '2026-05-31', repeat: 'none' }, now), true);
+assert.strictEqual(isTodoOverdue({ dueDate: '2026-05-31', repeat: 'daily' }, now), false);   // daily: never overdue
+assert.strictEqual(isTodoOverdue({ dueDate: '2026-05-31', repeat: 'weekly' }, now), false);
+assert.strictEqual(isTodoOverdue({ dueDate: '2026-05-31', repeat: 'monthly' }, now), false);
+assert.strictEqual(isTodoOverdue({ dueDate: '2026-06-15' }, now), false);                    // future due
+assert.strictEqual(isTodoOverdue({ dueDate: '2026-05-31', completed: true }, now), false);   // already done
+assert.strictEqual(isTodoOverdue({ repeat: 'daily' }, now), false);                          // no dueDate
+
+// a daily todo with a stale dueDate no longer jumps into the overdue band when sorting
+const sortedRepeat = sortTodosForDisplay([
+  { id: 'n', text: 'normal', createdAt: '2026-06-01T10:00:00.000Z' },
+  { id: 'r', text: 'daily stale', dueDate: '2026-05-31', repeat: 'daily', createdAt: '2026-06-01T08:00:00.000Z' }
+], now).map(t => t.id);
+assert.deepStrictEqual(sortedRepeat, ['n', 'r']);
 
 assert.deepStrictEqual(filterTodosForView([
   { id: 'a', repeat: 'none' },
