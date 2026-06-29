@@ -1,4 +1,4 @@
-﻿// Background service worker: per-todo daily reminders so a missed check-in
+// Background service worker: per-todo daily reminders so a missed check-in
 // doesn't slip by. Each unfinished todo fires at its own reminderTime, or at the
 // global daily time when it has none.
 
@@ -131,17 +131,15 @@ function reschedule(done) {
         .filter((t) => !t.completed)
         .forEach((t) => {
           const time = t.reminderTime || globalTime;
-          const when = nextOccurrence(time);
-          chrome.alarms.create('todo_' + t.id, {
-            when,
-            periodInMinutes: 1440 // every 24h, keeps the same clock time
-          });
+          const alarmOptions = reminderAlarmOptions(t, time);
+          if (!alarmOptions) return;
+          chrome.alarms.create('todo_' + t.id, alarmOptions);
           scheduled.push({
             id: t.id,
             text: t.text,
             time,
-            whenMs: when,
-            when: new Date(when).toLocaleString()
+            whenMs: alarmOptions.when,
+            when: new Date(alarmOptions.when).toLocaleString()
           });
         });
       if (typeof done === 'function') done(scheduled);
@@ -254,10 +252,49 @@ function completeTodo(todoId, notificationId) {
   });
 }
 
+function reminderAlarmOptions(todo, hhmm) {
+  const oneShotWhen = oneShotReminderTime(todo, hhmm);
+  if (oneShotWhen != null) return { when: oneShotWhen };
+  return {
+    when: nextOccurrence(hhmm),
+    periodInMinutes: 1440 // every 24h, keeps the same clock time
+  };
+}
+
+function oneShotReminderTime(todo, hhmm) {
+  if (!todo || !todo.oneShotReminder || !todo.dueDate) return null;
+  const dateMatch = String(todo.dueDate).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const time = parseTimeParts(hhmm);
+  if (!dateMatch || !time) return null;
+
+  const when = new Date(
+    Number(dateMatch[1]),
+    Number(dateMatch[2]) - 1,
+    Number(dateMatch[3]),
+    time.h,
+    time.m,
+    0,
+    0
+  ).getTime();
+  if (!Number.isFinite(when) || when <= Date.now()) return null;
+  return when;
+}
+
+function parseTimeParts(hhmm) {
+  const match = String(hhmm || '20:00').match(/^(\d{1,2}):(\d{1,2})$/);
+  if (!match) return { h: 20, m: 0 };
+  const h = Number(match[1]);
+  const m = Number(match[2]);
+  if (!Number.isFinite(h) || !Number.isFinite(m) || h < 0 || h > 23 || m < 0 || m > 59) {
+    return { h: 20, m: 0 };
+  }
+  return { h, m };
+}
+
 function nextOccurrence(hhmm) {
-  const [h, m] = (hhmm || '20:00').split(':').map(Number);
+  const { h, m } = parseTimeParts(hhmm);
   const now = new Date();
-  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h || 0, m || 0, 0, 0);
+  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
   if (next.getTime() <= now.getTime()) next.setDate(next.getDate() + 1);
   return next.getTime();
 }

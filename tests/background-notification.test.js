@@ -163,6 +163,30 @@ test('a completed repeat todo is scheduled to come back next period', () => {
   assert.ok(!calls.alarmCreates.some((c) => c.name === 'todo_r1'));
 });
 
+test('a dated one-shot todo schedules one reminder on its due date', () => {
+  const { listeners, calls } = loadBackground({
+    storage: {
+      reminderEnabled: true,
+      reminderTime: '20:00',
+      todos: [{
+        id: 'exam-high-statistics',
+        text: '高等统计学 考试地点：4305，考试时间：15:00-17:00',
+        completed: false,
+        dueDate: '2099-07-01',
+        reminderTime: '14:00',
+        repeat: 'none',
+        oneShotReminder: true
+      }]
+    }
+  });
+
+  listeners.installed({ reason: 'install' });
+
+  const alarm = calls.alarmCreates.find((c) => c.name === 'todo_exam-high-statistics');
+  assert.ok(alarm, 'dated todo reminder should be scheduled');
+  assert.equal(alarm.opts.when, new Date(2099, 6, 1, 14, 0, 0, 0).getTime());
+  assert.equal('periodInMinutes' in alarm.opts, false);
+});
 test('a reset alarm flips a due completed repeat todo back to active', () => {
   const completedAt = new Date(2020, 0, 1, 21, 0, 0, 0).getTime();
   const { listeners, storage } = loadBackground({

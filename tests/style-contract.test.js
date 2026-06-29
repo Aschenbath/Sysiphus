@@ -101,3 +101,23 @@ test('Quick Add demo uses the app flow and does not open global reminder panel',
   assert.match(quickDemo, /showEditForm\(todos\[0\]\)/);
   assert.doesNotMatch(quickDemo, /reminderPanel/);
 });
+
+test('one-shot exam import has complete popup bindings and visible exams', () => {
+  assert.match(popupJs, /mergeMissingTodos,/);
+  assert.match(popupJs, /const EXAM_IMPORT_KEY =/);
+  assert.match(popupJs, /const EXAM_IMPORT_CREATED_AT =/);
+  assert.match(popupJs, /function saveTodos\(extra = \{\}\)/);
+  assert.match(popupJs, /chrome\.storage\.local\.set\(\{ todos: todos, \.\.\.extra \}/);
+  assert.match(popupJs, /oneShotReminder: true/);
+  [
+    ['高等统计学 考试地点：4305，考试时间：15:00-17:00', '2026-07-01', '14:00'],
+    ['操作系统 考试地点：5C601，考试时间：09:00-11:00', '2026-07-02', '08:00'],
+    ['马克思主义基本原理 考试地点：4303，考试时间：15:00-17:00', '2026-07-03', '14:00'],
+    ['大学英语 IV（翻译） 考试地点：5B703，考试时间：09:00-11:00', '2026-07-07', '08:00'],
+    ['软件工程基础 考试地点：4104，考试时间：15:00-17:00', '2026-07-08', '14:00']
+  ].forEach(([text, dueDate, reminderTime]) => {
+    assert.ok(popupJs.includes(text), `${text} should be imported`);
+    assert.match(popupJs, new RegExp(`dueDate: '${dueDate}'`));
+    assert.match(popupJs, new RegExp(`reminderTime: '${reminderTime}'`));
+  });
+});

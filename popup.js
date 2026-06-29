@@ -1,4 +1,4 @@
-﻿// DOM elements
+// DOM elements
 const addBtn = document.getElementById('addBtn');
 const appTitle = document.getElementById('appTitle');
 const addTodoForm = document.getElementById('addTodoForm');
@@ -35,6 +35,7 @@ const {
   filterTodosForView,
   formatDateDisplay,
   isTodoOverdue,
+  mergeMissingTodos,
   normalizeAppTitle,
   normalizeQuoteSettings,
   normalizeTodoViewMode,
@@ -61,6 +62,8 @@ const FADE_DELAY = 60000;
 const APP_TITLE_KEY = 'appTitle';
 const QUOTE_SETTINGS_KEY = 'quoteSettings';
 const TODO_VIEW_MODE_KEY = 'todoViewMode';
+const EXAM_IMPORT_KEY = 'examImport_2026_07_google_tasks_20260629';
+const EXAM_IMPORT_CREATED_AT = '2026-06-29T03:28:00.000Z';
 
 // Initialize
 if (typeof I18N !== 'undefined') I18N.applyStaticI18n();
@@ -264,6 +267,71 @@ function normalizeTodoIds() {
     seen.add(String(todo.id));
   });
   return changed;
+}
+
+function buildExamImportTodos() {
+  return [
+    {
+      id: 'exam-20260701-high-statistics',
+      text: '高等统计学 考试地点：4305，考试时间：15:00-17:00',
+      completed: false,
+      dueDate: '2026-07-01',
+      repeat: 'none',
+      reminderTime: '14:00',
+      nagMinutes: 0,
+      pinned: false,
+      oneShotReminder: true,
+      createdAt: EXAM_IMPORT_CREATED_AT
+    },
+    {
+      id: 'exam-20260702-operating-system',
+      text: '操作系统 考试地点：5C601，考试时间：09:00-11:00',
+      completed: false,
+      dueDate: '2026-07-02',
+      repeat: 'none',
+      reminderTime: '08:00',
+      nagMinutes: 0,
+      pinned: false,
+      oneShotReminder: true,
+      createdAt: EXAM_IMPORT_CREATED_AT
+    },
+    {
+      id: 'exam-20260703-marxism-principles',
+      text: '马克思主义基本原理 考试地点：4303，考试时间：15:00-17:00',
+      completed: false,
+      dueDate: '2026-07-03',
+      repeat: 'none',
+      reminderTime: '14:00',
+      nagMinutes: 0,
+      pinned: false,
+      oneShotReminder: true,
+      createdAt: EXAM_IMPORT_CREATED_AT
+    },
+    {
+      id: 'exam-20260707-college-english-iv-translation',
+      text: '大学英语 IV（翻译） 考试地点：5B703，考试时间：09:00-11:00',
+      completed: false,
+      dueDate: '2026-07-07',
+      repeat: 'none',
+      reminderTime: '08:00',
+      nagMinutes: 0,
+      pinned: false,
+      oneShotReminder: true,
+      createdAt: EXAM_IMPORT_CREATED_AT
+    },
+    {
+      id: 'exam-20260708-software-engineering-basics',
+      text: '软件工程基础 考试地点：4104，考试时间：15:00-17:00',
+      completed: false,
+      dueDate: '2026-07-08',
+      repeat: 'none',
+      reminderTime: '14:00',
+      nagMinutes: 0,
+      pinned: false,
+      oneShotReminder: true,
+      createdAt: EXAM_IMPORT_CREATED_AT
+    }
+  ];
 }
 
 loadReminderSettings();
@@ -939,17 +1007,30 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-function saveTodos() {
-  chrome.storage.local.set({ todos: todos }, () => {
+function saveTodos(extra = {}) {
+  chrome.storage.local.set({ todos: todos, ...extra }, () => {
     // keep per-todo reminder alarms in sync with the latest list
     chrome.runtime.sendMessage({ type: 'updateReminder' });
   });
 }
 
 function loadTodos() {
-  chrome.storage.local.get(['todos', TODO_VIEW_MODE_KEY], (result) => {
+  chrome.storage.local.get(['todos', TODO_VIEW_MODE_KEY, EXAM_IMPORT_KEY], (result) => {
     todoViewMode = normalizeTodoViewMode(result[TODO_VIEW_MODE_KEY]);
     todos = result.todos || [];
+    const storageUpdates = {};
+    let importedChanged = false;
+
+    if (!result[EXAM_IMPORT_KEY]) {
+      const imported = mergeMissingTodos(todos, buildExamImportTodos());
+      todos = imported.todos;
+      importedChanged = imported.changed;
+      storageUpdates[EXAM_IMPORT_KEY] = true;
+      if (importedChanged) {
+        todoViewMode = 'all';
+        storageUpdates[TODO_VIEW_MODE_KEY] = todoViewMode;
+      }
+    }
 
     // Migrate: any already-completed todo without a timestamp gets a fresh window
     todos.forEach(todo => {
@@ -966,7 +1047,11 @@ function loadTodos() {
     if (rolledChanged) todos = rolled.todos;
 
     purgeExpiredCompleted();
-    if (idsChanged || rolledChanged) saveTodos();
+    if (importedChanged || idsChanged || rolledChanged) {
+      saveTodos(storageUpdates);
+    } else if (Object.keys(storageUpdates).length > 0) {
+      chrome.storage.local.set(storageUpdates);
+    }
     renderTodos();
     scheduleAllFadeTimers();
   });
