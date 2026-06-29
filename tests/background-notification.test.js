@@ -170,7 +170,7 @@ test('a dated one-shot todo schedules one reminder on its due date', () => {
       reminderTime: '20:00',
       todos: [{
         id: 'exam-high-statistics',
-        text: '高等统计学 考试地点：4305，考试时间：15:00-17:00',
+        text: '高等统计学 7.1',
         completed: false,
         dueDate: '2099-07-01',
         reminderTime: '14:00',

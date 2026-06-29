@@ -64,7 +64,7 @@ const QUOTE_SETTINGS_KEY = 'quoteSettings';
 const TODO_VIEW_MODE_KEY = 'todoViewMode';
 const EXAM_IMPORT_KEY = 'examImport_2026_07_google_tasks_20260629';
 const EXAM_IMPORT_CREATED_AT = '2026-06-29T03:28:00.000Z';
-const EXAM_SOFTWARE_TITLE_MIGRATION_KEY = 'examSoftwareTitleMigration_20260629';
+const EXAM_TITLE_MIGRATION_KEY = 'examTitleMigration_20260629_subject_dates';
 
 // Initialize
 if (typeof I18N !== 'undefined') I18N.applyStaticI18n();
@@ -270,12 +270,21 @@ function normalizeTodoIds() {
   return changed;
 }
 
-function migrateSoftwareExamTitle(list) {
+const EXAM_TITLES_BY_ID = {
+  'exam-20260701-high-statistics': '高等统计学 7.1',
+  'exam-20260702-operating-system': '操作系统 7.2',
+  'exam-20260703-marxism-principles': '马克思主义基本原理 7.3',
+  'exam-20260707-college-english-iv-translation': '大学英语 IV（翻译） 7.7',
+  'exam-20260708-software-engineering-basics': '软件工程 7.8'
+};
+
+function migrateExamTitles(list) {
   let changed = false;
   const next = (Array.isArray(list) ? list : []).map((todo) => {
-    if (!todo || todo.text !== '软件工程基础 考试地点：4104，考试时间：15:00-17:00') return todo;
+    const title = todo && EXAM_TITLES_BY_ID[String(todo.id)];
+    if (!title || todo.text === title) return todo;
     changed = true;
-    return { ...todo, text: '软件工程 4104' };
+    return { ...todo, text: title };
   });
   return { todos: next, changed };
 }
@@ -284,7 +293,7 @@ function buildExamImportTodos() {
   return [
     {
       id: 'exam-20260701-high-statistics',
-      text: '高等统计学 考试地点：4305，考试时间：15:00-17:00',
+      text: '高等统计学 7.1',
       completed: false,
       dueDate: '2026-07-01',
       repeat: 'none',
@@ -296,7 +305,7 @@ function buildExamImportTodos() {
     },
     {
       id: 'exam-20260702-operating-system',
-      text: '操作系统 考试地点：5C601，考试时间：09:00-11:00',
+      text: '操作系统 7.2',
       completed: false,
       dueDate: '2026-07-02',
       repeat: 'none',
@@ -308,7 +317,7 @@ function buildExamImportTodos() {
     },
     {
       id: 'exam-20260703-marxism-principles',
-      text: '马克思主义基本原理 考试地点：4303，考试时间：15:00-17:00',
+      text: '马克思主义基本原理 7.3',
       completed: false,
       dueDate: '2026-07-03',
       repeat: 'none',
@@ -320,7 +329,7 @@ function buildExamImportTodos() {
     },
     {
       id: 'exam-20260707-college-english-iv-translation',
-      text: '大学英语 IV（翻译） 考试地点：5B703，考试时间：09:00-11:00',
+      text: '大学英语 IV（翻译） 7.7',
       completed: false,
       dueDate: '2026-07-07',
       repeat: 'none',
@@ -332,7 +341,7 @@ function buildExamImportTodos() {
     },
     {
       id: 'exam-20260708-software-engineering-basics',
-      text: '软件工程 4104',
+      text: '软件工程 7.8',
       completed: false,
       dueDate: '2026-07-08',
       repeat: 'none',
@@ -1026,7 +1035,7 @@ function saveTodos(extra = {}) {
 }
 
 function loadTodos() {
-  chrome.storage.local.get(['todos', TODO_VIEW_MODE_KEY, EXAM_IMPORT_KEY, EXAM_SOFTWARE_TITLE_MIGRATION_KEY], (result) => {
+  chrome.storage.local.get(['todos', TODO_VIEW_MODE_KEY, EXAM_IMPORT_KEY, EXAM_TITLE_MIGRATION_KEY], (result) => {
     todoViewMode = normalizeTodoViewMode(result[TODO_VIEW_MODE_KEY]);
     todos = result.todos || [];
     const storageUpdates = {};
@@ -1044,11 +1053,11 @@ function loadTodos() {
     }
 
     let titleMigratedChanged = false;
-    if (!result[EXAM_SOFTWARE_TITLE_MIGRATION_KEY]) {
-      const migrated = migrateSoftwareExamTitle(todos);
+    if (!result[EXAM_TITLE_MIGRATION_KEY]) {
+      const migrated = migrateExamTitles(todos);
       todos = migrated.todos;
       titleMigratedChanged = migrated.changed;
-      storageUpdates[EXAM_SOFTWARE_TITLE_MIGRATION_KEY] = true;
+      storageUpdates[EXAM_TITLE_MIGRATION_KEY] = true;
     }
 
     // Migrate: any already-completed todo without a timestamp gets a fresh window
