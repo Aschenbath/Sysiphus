@@ -64,6 +64,7 @@ const QUOTE_SETTINGS_KEY = 'quoteSettings';
 const TODO_VIEW_MODE_KEY = 'todoViewMode';
 const EXAM_IMPORT_KEY = 'examImport_2026_07_google_tasks_20260629';
 const EXAM_IMPORT_CREATED_AT = '2026-06-29T03:28:00.000Z';
+const EXAM_SOFTWARE_TITLE_MIGRATION_KEY = 'examSoftwareTitleMigration_20260629';
 
 // Initialize
 if (typeof I18N !== 'undefined') I18N.applyStaticI18n();
@@ -269,6 +270,16 @@ function normalizeTodoIds() {
   return changed;
 }
 
+function migrateSoftwareExamTitle(list) {
+  let changed = false;
+  const next = (Array.isArray(list) ? list : []).map((todo) => {
+    if (!todo || todo.text !== '软件工程基础 考试地点：4104，考试时间：15:00-17:00') return todo;
+    changed = true;
+    return { ...todo, text: '软件工程 4104' };
+  });
+  return { todos: next, changed };
+}
+
 function buildExamImportTodos() {
   return [
     {
@@ -321,7 +332,7 @@ function buildExamImportTodos() {
     },
     {
       id: 'exam-20260708-software-engineering-basics',
-      text: '软件工程基础 考试地点：4104，考试时间：15:00-17:00',
+      text: '软件工程 4104',
       completed: false,
       dueDate: '2026-07-08',
       repeat: 'none',
@@ -1015,7 +1026,7 @@ function saveTodos(extra = {}) {
 }
 
 function loadTodos() {
-  chrome.storage.local.get(['todos', TODO_VIEW_MODE_KEY, EXAM_IMPORT_KEY], (result) => {
+  chrome.storage.local.get(['todos', TODO_VIEW_MODE_KEY, EXAM_IMPORT_KEY, EXAM_SOFTWARE_TITLE_MIGRATION_KEY], (result) => {
     todoViewMode = normalizeTodoViewMode(result[TODO_VIEW_MODE_KEY]);
     todos = result.todos || [];
     const storageUpdates = {};
@@ -1030,6 +1041,14 @@ function loadTodos() {
         todoViewMode = 'all';
         storageUpdates[TODO_VIEW_MODE_KEY] = todoViewMode;
       }
+    }
+
+    let titleMigratedChanged = false;
+    if (!result[EXAM_SOFTWARE_TITLE_MIGRATION_KEY]) {
+      const migrated = migrateSoftwareExamTitle(todos);
+      todos = migrated.todos;
+      titleMigratedChanged = migrated.changed;
+      storageUpdates[EXAM_SOFTWARE_TITLE_MIGRATION_KEY] = true;
     }
 
     // Migrate: any already-completed todo without a timestamp gets a fresh window
@@ -1047,7 +1066,7 @@ function loadTodos() {
     if (rolledChanged) todos = rolled.todos;
 
     purgeExpiredCompleted();
-    if (importedChanged || idsChanged || rolledChanged) {
+    if (importedChanged || titleMigratedChanged || idsChanged || rolledChanged) {
       saveTodos(storageUpdates);
     } else if (Object.keys(storageUpdates).length > 0) {
       chrome.storage.local.set(storageUpdates);
