@@ -335,3 +335,16 @@ Sisyphus 不需要账号，不连接后端服务，不包含 analytics。标题�
 4. 点击 Load unpacked。
 5. 选择 `todo-extension` 文件夹。
 6. 可选：打开 `chrome://extensions/shortcuts` 修改快捷键，默认建议为 `Alt+Shift+S`。
+
+## 开发与验证
+
+无需构建步骤，核心解析、提醒排程、通知和 UI 契约都可直接用 Node.js 验证：
+
+```powershell
+node --test
+node --check todo-core.js
+node --check popup.js
+node --check background.js
+```
+
+README 截图可用 `node scripts/readme-screenshots.mjs` 重新生成。
