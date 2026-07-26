@@ -265,6 +265,16 @@ function startOfDayTs(ts) {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
 }
 
+// Add one month, clamping the day to the target month's length. Plain
+// setMonth(+1) overflows short months (Jan 31 -> Mar 3, skipping February)
+// and permanently loses the anchor day after one bad month.
+function addOneMonthClamped(d) {
+  const day = d.getDate();
+  const target = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+  const last = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+  d.setFullYear(target.getFullYear(), target.getMonth(), Math.min(day, last));
+}
+
 // Advance a YYYY-MM-DD string by `times` repeat periods. 'none'/unknown is a no-op.
 function advanceRepeatDate(dateString, repeat, times = 1) {
   const base = new Date(dateString);
@@ -274,7 +284,7 @@ function advanceRepeatDate(dateString, repeat, times = 1) {
   for (let i = 0; i < steps; i++) {
     if (repeat === 'daily') d.setDate(d.getDate() + 1);
     else if (repeat === 'weekly') d.setDate(d.getDate() + 7);
-    else if (repeat === 'monthly') d.setMonth(d.getMonth() + 1);
+    else if (repeat === 'monthly') addOneMonthClamped(d);
     else return dateString;
   }
   return dateToInputValue(d);
@@ -288,7 +298,7 @@ function nextRepeatResetTime(completedAt, repeat) {
   const d = new Date(startOfDayTs(ts));
   if (repeat === 'daily') d.setDate(d.getDate() + 1);
   else if (repeat === 'weekly') d.setDate(d.getDate() + 7);
-  else if (repeat === 'monthly') d.setMonth(d.getMonth() + 1);
+  else if (repeat === 'monthly') addOneMonthClamped(d);
   return d.getTime();
 }
 

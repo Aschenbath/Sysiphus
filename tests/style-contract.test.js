@@ -73,6 +73,21 @@ test('reminder-time field commits the form on Enter', () => {
   );
 });
 
+test('core row interactions stay keyboard-accessible', () => {
+  // Hover-revealed secondary actions must also reveal for keyboard focus, and
+  // the completion checkbox must be a real focusable checkbox with key handling.
+  assert.equal(
+    selectorHasDeclaration('.todo-item:focus-within .todo-actions', 'opacity: 1;'),
+    true,
+    '.todo-item:focus-within should reveal .todo-actions'
+  );
+  assert.match(popupJs, /role="checkbox"/);
+  assert.match(popupJs, /aria-checked=/);
+  assert.match(popupJs, /tabindex="0"/);
+  const checkboxBlock = popupJs.slice(popupJs.indexOf("querySelectorAll('.todo-checkbox')"));
+  assert.match(checkboxBlock.slice(0, 700), /addEventListener\('keydown'/);
+});
+
 test('clicking anywhere on a todo row opens the inline editor', () => {
   // The edit click must be bound to the whole .todo-item row, not just
   // .todo-content. Otherwise the padding, the flex gaps, and the invisible

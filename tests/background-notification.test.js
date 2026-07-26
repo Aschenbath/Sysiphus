@@ -187,6 +187,46 @@ test('a dated one-shot todo schedules one reminder on its due date', () => {
   assert.equal(alarm.opts.when, new Date(2099, 6, 1, 14, 0, 0, 0).getTime());
   assert.equal('periodInMinutes' in alarm.opts, false);
 });
+
+test('an expired one-shot todo schedules nothing instead of degrading to a daily nag', () => {
+  const { listeners, calls } = loadBackground({
+    storage: {
+      reminderEnabled: true,
+      reminderTime: '20:00',
+      todos: [{
+        id: 'exam-past',
+        text: '高等统计学 7.1',
+        completed: false,
+        dueDate: '2020-07-01',
+        reminderTime: '14:00',
+        repeat: 'none',
+        oneShotReminder: true
+      }]
+    }
+  });
+
+  listeners.installed({ reason: 'install' });
+
+  assert.ok(
+    !calls.alarmCreates.some((c) => c.name === 'todo_exam-past'),
+    'expired one-shot must not fall through to the periodInMinutes daily branch'
+  );
+});
+
+test('snoozing a notification for a deleted todo clears the toast without writing storage', () => {
+  const { listeners, calls, storage } = loadBackground({
+    storage: {
+      snoozeMinutes: 10,
+      todos: [{ id: 'todo-b', text: '干饭', completed: false }]
+    }
+  });
+
+  listeners.clicked('todo_gone');
+
+  assert.equal(calls.alarmCreates.length, 0);
+  assert.equal(storage.todos.length, 1); // stale array not written back
+  assert.equal(calls.notificationClears.at(-1), 'todo_gone');
+});
 test('a reset alarm flips a due completed repeat todo back to active', () => {
   const completedAt = new Date(2020, 0, 1, 21, 0, 0, 0).getTime();
   const { listeners, storage } = loadBackground({

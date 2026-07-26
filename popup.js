@@ -54,6 +54,9 @@ let editingId = null;
 let isAddFormVisible = false;
 let todoViewMode = 'all';
 let fadeTimers = {};
+// Serialized snapshots of this popup's own pending storage writes, consumed by
+// the onChanged listener to skip self-echo re-renders (bounded FIFO).
+const pendingSelfWriteTokens = [];
 const editFormHome = document.createComment('edit-form-home');
 editTodoForm.before(editFormHome);
 
@@ -78,7 +81,19 @@ loadQuoteSettings();
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
   if (areaName !== 'local') return;
-  if (changes.todos) syncTodosFromStorage(changes.todos.newValue || []);
+  if (changes.todos) {
+    // Suppress this popup's own write echoes: every saveTodos() would otherwise
+    // bounce back through here and re-render (and replay animations) a second
+    // time. Background-originated writes (snooze/rollover/Done) serialize to a
+    // different value and still sync.
+    const incoming = JSON.stringify(changes.todos.newValue || []);
+    const selfIdx = pendingSelfWriteTokens.indexOf(incoming);
+    if (selfIdx !== -1) {
+      pendingSelfWriteTokens.splice(selfIdx, 1);
+    } else {
+      syncTodosFromStorage(changes.todos.newValue || []);
+    }
+  }
   if (changes[APP_TITLE_KEY] && !appTitle.isContentEditable) {
     renderAppTitle(changes[APP_TITLE_KEY].newValue);
   }
@@ -87,7 +102,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   }
 });
 
-// Auto day/night theme: dark 18:00鈥?6:00, light otherwise. No manual toggle.
+// Auto day/night theme: dark 18:00–06:00, light otherwise. No manual toggle.
 function applyTheme() {
   const hour = new Date().getHours();
   const dark = hour >= 18 || hour < 6;
@@ -374,6 +389,10 @@ function saveReminderSettings() {
       snoozeMinutes: clampSnoozeMinutes(snoozeMinutes.value)
     },
     () => {
+      if (chrome.runtime.lastError) {
+        console.warn('[Sisyphus] reminder settings save failed:', chrome.runtime.lastError.message);
+        return;
+      }
       chrome.runtime.sendMessage({ type: 'updateReminder' });
     }
   );
@@ -952,7 +971,7 @@ function renderTodos() {
     const overdue = isTodoOverdue(todo);
     return `
       <div class="todo-item ${todo.completed ? 'completed' : ''} ${todo.pinned ? 'pinned' : ''} ${overdue ? 'overdue' : ''} ${editingId === todo.id ? 'editing' : ''}" data-id="${todo.id}">
-        <div class="todo-checkbox ${todo.completed ? 'checked' : ''}" data-id="${todo.id}"></div>
+        <div class="todo-checkbox ${todo.completed ? 'checked' : ''}" data-id="${todo.id}" role="checkbox" aria-checked="${todo.completed ? 'true' : 'false'}" tabindex="0" aria-label="${todo.completed ? 'Mark as not done' : 'Mark as done'}"></div>
         <div class="todo-content" data-id="${todo.id}">
           <div class="todo-text">${renderTextWithSystemNumbers(todo.text)}</div>
         </div>
@@ -971,6 +990,14 @@ function renderTodos() {
   // Add event listeners
   document.querySelectorAll('.todo-checkbox').forEach(checkbox => {
     checkbox.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleTodo(e.currentTarget.dataset.id);
+    });
+    // role=checkbox contract: Enter/Space toggle from the keyboard without
+    // bubbling into the row's click-to-edit handler.
+    checkbox.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      e.preventDefault();
       e.stopPropagation();
       toggleTodo(e.currentTarget.dataset.id);
     });
@@ -1005,22 +1032,6 @@ function renderTodos() {
   });
 }
 
-function formatDate(dateString) {
-  const date = new Date(dateString);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
-  const targetDate = new Date(dateString);
-  targetDate.setHours(0, 0, 0, 0);
-
-  if (targetDate.getTime() === today.getTime()) return 'Today';
-  if (targetDate.getTime() === tomorrow.getTime()) return 'Tomorrow';
-
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
-
 function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
@@ -1028,7 +1039,19 @@ function escapeHtml(text) {
 }
 
 function saveTodos(extra = {}) {
+  const selfWriteToken = JSON.stringify(todos);
+  pendingSelfWriteTokens.push(selfWriteToken);
+  if (pendingSelfWriteTokens.length > 8) pendingSelfWriteTokens.shift();
   chrome.storage.local.set({ todos: todos, ...extra }, () => {
+    if (chrome.runtime.lastError) {
+      // Failed write produces no echo; drop the token and re-render from the
+      // real persisted state instead of silently showing unsaved memory.
+      const idx = pendingSelfWriteTokens.indexOf(selfWriteToken);
+      if (idx !== -1) pendingSelfWriteTokens.splice(idx, 1);
+      console.warn('[Sisyphus] save failed:', chrome.runtime.lastError.message);
+      loadTodos();
+      return;
+    }
     // keep per-todo reminder alarms in sync with the latest list
     chrome.runtime.sendMessage({ type: 'updateReminder' });
   });

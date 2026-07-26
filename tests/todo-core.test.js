@@ -234,12 +234,23 @@ assert.strictEqual(advanceRepeatDate('2026-06-15', 'monthly'), '2026-07-15');
 assert.strictEqual(advanceRepeatDate('2026-06-01', 'none'), '2026-06-01');
 assert.strictEqual(advanceRepeatDate('2026-06-01', 'daily', 3), '2026-06-04');
 
+// Monthly must clamp instead of overflowing short months: plain setMonth(+1)
+// turns Jan 31 into Mar 3 (skipping February) and loses the anchor day forever.
+assert.strictEqual(advanceRepeatDate('2026-01-31', 'monthly'), '2026-02-28');
+assert.strictEqual(advanceRepeatDate('2028-01-31', 'monthly'), '2028-02-29'); // leap year
+assert.strictEqual(advanceRepeatDate('2026-08-31', 'monthly'), '2026-09-30');
+assert.strictEqual(advanceRepeatDate('2026-02-28', 'monthly'), '2026-03-28');
+
 const completed601 = new Date(2026, 5, 1, 21, 0, 0, 0).getTime();
 assert.strictEqual(nextRepeatResetTime(completed601, 'daily'), new Date(2026, 5, 2, 0, 0, 0, 0).getTime());
 assert.strictEqual(nextRepeatResetTime(completed601, 'weekly'), new Date(2026, 5, 8, 0, 0, 0, 0).getTime());
 assert.strictEqual(nextRepeatResetTime(completed601, 'monthly'), new Date(2026, 6, 1, 0, 0, 0, 0).getTime());
 assert.strictEqual(nextRepeatResetTime(completed601, 'none'), null);
 assert.strictEqual(nextRepeatResetTime(undefined, 'daily'), null);
+
+// Monthly reset clamps too: completed Jan 31 flips back Feb 28, not Mar 3.
+const completed0131 = new Date(2026, 0, 31, 21, 0, 0, 0).getTime();
+assert.strictEqual(nextRepeatResetTime(completed0131, 'monthly'), new Date(2026, 1, 28, 0, 0, 0, 0).getTime());
 
 const day2noon = new Date(2026, 5, 2, 12, 0, 0, 0).getTime();
 const rolled = rolloverRepeatTodos([
