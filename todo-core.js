@@ -32,10 +32,21 @@ function dateToInputValue(date) {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+// Date-input values are local calendar days, not UTC timestamps.
+function parseDateInput(dateString) {
+  const match = String(dateString || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+  const [year, month, day] = match.slice(1).map(Number);
+  const date = new Date(0);
+  date.setFullYear(year, month - 1, day);
+  date.setHours(0, 0, 0, 0);
+  return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day
+    ? date : null;
+}
+
 function formatDateDisplay(dateString) {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  if (Number.isNaN(date.getTime())) return '';
+  const date = parseDateInput(dateString);
+  if (!date) return '';
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${month}/${day}`;
@@ -224,8 +235,8 @@ function isTodoOverdue(todo, now = new Date()) {
   // completed cycle still sitting on a past dueDate is just "today's turn", not
   // overdue. A daily/weekly/monthly task therefore never shows the overdue hint.
   if (!todo || todo.completed || isRepeatTodo(todo) || !todo.dueDate) return false;
-  const due = normalizeDate(new Date(todo.dueDate));
-  return due.getTime() < normalizeDate(now).getTime();
+  const due = parseDateInput(todo.dueDate);
+  return !!due && due.getTime() < normalizeDate(now).getTime();
 }
 
 function sortTodosForDisplay(todos, now = new Date()) {
@@ -277,9 +288,8 @@ function addOneMonthClamped(d) {
 
 // Advance a YYYY-MM-DD string by `times` repeat periods. 'none'/unknown is a no-op.
 function advanceRepeatDate(dateString, repeat, times = 1) {
-  const base = new Date(dateString);
-  if (Number.isNaN(base.getTime())) return dateString;
-  const d = new Date(base.getFullYear(), base.getMonth(), base.getDate());
+  const d = parseDateInput(dateString);
+  if (!d) return dateString;
   const steps = Math.max(0, Number(times) || 0);
   for (let i = 0; i < steps; i++) {
     if (repeat === 'daily') d.setDate(d.getDate() + 1);
@@ -306,10 +316,10 @@ function nextRepeatResetTime(completedAt, repeat) {
 function advanceDueDateToFuture(dateString, repeat, nowTs) {
   const todayStart = startOfDayTs(nowTs);
   let out = dateString;
-  for (let guard = 0; guard < 1000; guard++) {
-    const cur = new Date(out);
-    if (Number.isNaN(cur.getTime())) return dateString;
-    if (startOfDayTs(cur.getTime()) >= todayStart) break;
+  while (true) {
+    const cur = parseDateInput(out);
+    if (!cur) return dateString;
+    if (cur.getTime() >= todayStart) break;
     const next = advanceRepeatDate(out, repeat, 1);
     if (next === out) break; // 'none'/unknown: avoid an infinite loop
     out = next;
@@ -411,7 +421,9 @@ function escapeHtmlText(text) {
 }
 
 function renderTextWithSystemNumbers(text) {
-  return escapeHtmlText(text).replace(/\d+/g, '<span class="num">$&</span>');
+  return String(text || '').split(/(\d+)/).map((part, index) =>
+    index % 2 ? `<span class="num">${part}</span>` : escapeHtmlText(part)
+  ).join('');
 }
 
   function nextReminderHistory(history, time, limit = 3) {
@@ -441,6 +453,7 @@ function renderTextWithSystemNumbers(text) {
     normalizeTodoViewMode,
     nextReminderHistory,
   parseQuickAdd,
+  parseDateInput,
   parseReminderInput,
   renderTextWithSystemNumbers,
   shouldAutoDeleteCompletedTodo,

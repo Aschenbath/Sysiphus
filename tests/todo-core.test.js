@@ -159,6 +159,11 @@ assert.strictEqual(
   '<span class="num">15</span>:<span class="num">05</span> &lt;干饭&gt; &amp; <span class="num">0930</span>'
 );
 
+assert.strictEqual(
+  renderTextWithSystemNumbers(`don't "forget" <script>123</script> & &#39;`),
+  `don&#39;t &quot;forget&quot; &lt;script&gt;<span class="num">123</span>&lt;/script&gt; &amp; &amp;#<span class="num">39</span>;`
+);
+
 assert.strictEqual(clampSnoozeMinutes(5), 5);
 assert.strictEqual(clampSnoozeMinutes('30'), 30);
 assert.strictEqual(clampSnoozeMinutes('999'), 10);
