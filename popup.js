@@ -120,23 +120,6 @@ function loadLocale() {
 }
 
 // ---------- Daily reminder settings ----------
-function setTodoReminderField(input, val) {
-  input.value = val || '';
-}
-
-function todoVisibleReminderTime(todo) {
-  const snoozedUntil = Number(todo.snoozedUntil || 0);
-  if (snoozedUntil > Date.now()) {
-    return hhmmFromTimestamp(snoozedUntil);
-  }
-  return todo.reminderTime || '';
-}
-
-function hhmmFromTimestamp(ts) {
-  const date = new Date(ts);
-  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-}
-
 function formatReminderInput(input) {
   const raw = input.value.trim();
   if (/^\d{4}$/.test(raw)) {
@@ -746,7 +729,7 @@ function showEditForm(todo) {
   const editSelect = document.querySelector('#editRepeatSelect');
   setCustomSelectValue(editSelect, todo.repeat || 'none');
 
-  setTodoReminderField(editTodoReminderInput, todoVisibleReminderTime(todo));
+  editTodoReminderInput.value = todo.reminderTime || '';
   setCustomSelectValue(editTodoNagMinutes, String(clampNagMinutes(todo.nagMinutes)));
 
   setTimeout(() => {
@@ -874,29 +857,29 @@ function scheduleFadeTimer(todo) {
   clearFadeTimer(todo.id);
   if (!todo.completed || !todo.completedAt) return;
 
+  const completedAt = todo.completedAt;
   const remaining = Math.max(0, FADE_DELAY - (Date.now() - todo.completedAt));
+  // Storage sync replaces todo objects. Check the live completion cycle at both
+  // timeout stages so an old callback cannot delete a reopened/recompleted task.
+  const currentCompletion = () => todos.find(current =>
+    String(current.id) === String(todo.id) && current.completed && current.completedAt === completedAt
+  );
 
   fadeTimers[todo.id] = setTimeout(() => {
+    delete fadeTimers[todo.id];
+    if (!currentCompletion()) return;
     const todoElement = document.querySelector(`.todo-item[data-id="${todo.id}"]`);
-    // Repeat todos are kept as an archive and reset next period, so they fade out
-    // of the active list instead of being deleted.
-    if (!shouldAutoDeleteCompletedTodo(todo)) {
-      if (todoElement) {
-        todoElement.classList.add('fading');
-        setTimeout(renderTodos, 500);
-      } else {
-        renderTodos();
-      }
-      return;
-    }
-    if (todoElement) {
-      todoElement.classList.add('fading');
-      setTimeout(() => {
-        deleteTodo(todo.id, todoElement);
-      }, 500);
-    } else {
-      deleteTodo(todo.id);
-    }
+    const finishFade = () => {
+      delete fadeTimers[todo.id];
+      const current = currentCompletion();
+      if (!current) return;
+      // Repeat completions remain in storage as an archive until their reset.
+      if (shouldAutoDeleteCompletedTodo(current)) deleteTodo(current.id);
+      else renderTodos();
+    };
+    if (!todoElement) return finishFade();
+    todoElement.classList.add('fading');
+    fadeTimers[todo.id] = setTimeout(finishFade, 500);
   }, remaining);
 }
 
@@ -909,16 +892,14 @@ function purgeExpiredCompleted() {
     t.completedAt &&
     now - t.completedAt >= FADE_DELAY
   ));
-  if (todos.length !== before) {
-    saveTodos();
-  }
+  return todos.length !== before;
 }
 
 // Re-arm fade timers for completed todos still within their window
 function scheduleAllFadeTimers() {
+  Object.keys(fadeTimers).forEach(clearFadeTimer);
   todos.forEach(todo => {
     if (todo.completed && todo.completedAt) {
-      clearFadeTimer(todo.id);
       scheduleFadeTimer(todo);
     }
   });
@@ -1084,9 +1065,11 @@ function loadTodos() {
     }
 
     // Migrate: any already-completed todo without a timestamp gets a fresh window
+    let completedAtChanged = false;
     todos.forEach(todo => {
       if (todo.completed && !todo.completedAt) {
         todo.completedAt = Date.now();
+        completedAtChanged = true;
       }
     });
     const idsChanged = normalizeTodoIds();
@@ -1097,8 +1080,8 @@ function loadTodos() {
     const rolledChanged = rolled.changed;
     if (rolledChanged) todos = rolled.todos;
 
-    purgeExpiredCompleted();
-    if (importedChanged || titleMigratedChanged || idsChanged || rolledChanged) {
+    const purgedChanged = purgeExpiredCompleted();
+    if (importedChanged || titleMigratedChanged || idsChanged || rolledChanged || completedAtChanged || purgedChanged) {
       saveTodos(storageUpdates);
     } else if (Object.keys(storageUpdates).length > 0) {
       chrome.storage.local.set(storageUpdates);
