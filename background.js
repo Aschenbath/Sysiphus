@@ -5,13 +5,17 @@
 // Share the repeat-cycle date logic with the popup so "明天重置" stays identical
 // whether the popup is open or not.
 importScripts('i18n.js', 'todo-core.js');
-const { nextRepeatResetTime, rolloverRepeatTodos } = globalThis.TodoCore;
+const {
+  clampNagMinutes, clampSnoozeMinutes, nextRepeatResetTime,
+  parseDateInput, parseReminderInput, rolloverRepeatTodos
+} = globalThis.TodoCore;
 
 chrome.runtime.onInstalled.addListener(reschedule);
 chrome.runtime.onStartup.addListener(reschedule);
 
 const recentNotifications = new Map();
 const NOTIFICATION_DEDUPE_MS = 60000;
+const rescheduleQueue = [];
 
 // popup tells us to reschedule whenever todos or reminder settings change.
 chrome.runtime.onMessage.addListener((msg) => {
@@ -47,32 +51,41 @@ chrome.alarms.onAlarm.addListener((alarm) => {
     return;
   }
 
-  chrome.storage.local.get(['todos', 'reminderEnabled', 'snoozeMinutes'], (res) => {
+  chrome.storage.local.get(['todos', 'reminderEnabled', 'reminderTime', 'snoozeMinutes'], (res) => {
     if (res.reminderEnabled === false) return;
     const todos = Array.isArray(res.todos) ? res.todos : [];
     const todo = todos.find((t) => String(t.id) === parsed.id);
     if (!todo || todo.completed) return; // gone or already done — stay quiet
 
-    if (parsed.kind === 'snooze') {
-      delete todo.snoozedUntil;
-      chrome.storage.local.set({ todos }, () => {
-        if (chrome.runtime.lastError) {
-          console.warn('[Sisyphus] snooze-clear save failed:', chrome.runtime.lastError.message);
-        }
-      });
+    // Calendar alarms are one-shot: compute tomorrow in local time so daylight
+    // saving changes cannot move the reminder an hour. Dated one-shots have no
+    // successor once their due moment has passed.
+    if (parsed.kind === 'todo') {
+      const next = reminderAlarmOptions(todo, todo.reminderTime || res.reminderTime || '20:00');
+      if (next) chrome.alarms.create('todo_' + todo.id, next);
     }
 
+    // A queued daily/old snooze event must not override a newer user snooze.
+    if (parsed.kind === 'snooze' && !Number.isFinite(Number(todo.snoozedUntil))) return;
+    if (Number(todo.snoozedUntil) > Date.now()) return;
     if (!shouldNotifyTodo(todo.id)) return;
 
-    if (parsed.kind === 'todo') chrome.alarms.clear('snooze_' + todo.id);
+    notifyTodo(todo, clampSnoozeMinutes(res.snoozeMinutes));
 
-    const snoozeMinutes = clampMinutes(res.snoozeMinutes, [5, 10, 15, 30], 10);
-    notifyTodo(todo, snoozeMinutes);
-
-    const nagMinutes = clampMinutes(todo.nagMinutes, [5, 10, 15, 30], 0);
-    if (parsed.kind === 'todo' && nagMinutes > 0) {
-      chrome.alarms.create('snooze_' + todo.id, {
-        when: Date.now() + nagMinutes * 60 * 1000
+    const nagMinutes = clampNagMinutes(todo.nagMinutes);
+    const hadSnooze = Object.prototype.hasOwnProperty.call(todo, 'snoozedUntil');
+    const when = nagMinutes > 0 ? Date.now() + nagMinutes * 60 * 1000 : null;
+    if (when != null) todo.snoozedUntil = when;
+    else delete todo.snoozedUntil;
+    // Wait for the clear before recreating the same alarm name.
+    chrome.alarms.clear('snooze_' + todo.id, () => {
+      if (when != null) chrome.alarms.create('snooze_' + todo.id, { when });
+    });
+    if (hadSnooze || when != null) {
+      chrome.storage.local.set({ todos }, () => {
+        if (chrome.runtime.lastError) {
+          console.warn('[Sisyphus] follow-up save failed:', chrome.runtime.lastError.message);
+        }
       });
     }
   });
@@ -107,51 +120,84 @@ chrome.notifications.onButtonClicked.addListener((notificationId, buttonIndex) =
 });
 
 function reschedule(done) {
+  rescheduleQueue.push(done);
+  if (rescheduleQueue.length === 1) runNextReschedule();
+}
+
+function runNextReschedule() {
+  const done = rescheduleQueue[0];
+  const finish = (scheduled) => {
+    try {
+      if (typeof done === 'function') done(scheduled);
+    } finally {
+      rescheduleQueue.shift();
+      if (rescheduleQueue.length) runNextReschedule();
+    }
+  };
   chrome.storage.local.get(['reminderEnabled', 'reminderTime', 'todos'], (res) => {
+    if (chrome.runtime.lastError) {
+      console.warn('[Sisyphus] schedule read failed:', chrome.runtime.lastError.message);
+      finish([]);
+      return;
+    }
     const enabled = res.reminderEnabled !== false; // default ON
     const globalTime = res.reminderTime || '20:00';
     const todos = Array.isArray(res.todos) ? res.todos : [];
     const scheduled = [];
 
     chrome.alarms.getAll((alarms) => {
-      // drop every previous reminder/reset alarm (and the legacy global one)
-      alarms.forEach((a) => {
-        if (a.name === 'dailyReminder' || a.name.startsWith('todo_') || a.name.startsWith('reset_')) {
-          chrome.alarms.clear(a.name);
-        }
-      });
-
-      // Repeat 真循环: schedule each completed repeat todo to come back at the
-      // start of its next period. Runs even when reminders are off, since this is
-      // about the todo reappearing, not about notifying.
-      todos.forEach((t) => {
-        if (!t.completed) return;
-        const when = nextRepeatResetTime(t.completedAt, t.repeat);
-        if (when != null) chrome.alarms.create('reset_' + t.id, { when });
-      });
-
-      if (!enabled) {
-        if (typeof done === 'function') done(scheduled);
+      if (chrome.runtime.lastError) {
+        console.warn('[Sisyphus] alarm read failed:', chrome.runtime.lastError.message);
+        finish([]);
         return;
       }
+      // Rebuild all managed alarms from persisted state, including snoozes.
+      // Runs are serialized, and every clear must finish before replacement.
+      const managed = alarms.filter(a => a.name === 'dailyReminder' || parseAlarmName(a.name));
+      let remaining = managed.length;
+      if (!remaining) buildSchedule();
+      managed.forEach(a => chrome.alarms.clear(a.name, () => {
+        if (--remaining === 0) buildSchedule();
+      }));
 
-      // one alarm per unfinished todo, at its own time or the global default
-      todos
-        .filter((t) => !t.completed)
-        .forEach((t) => {
-          const time = t.reminderTime || globalTime;
-          const alarmOptions = reminderAlarmOptions(t, time);
-          if (!alarmOptions) return;
-          chrome.alarms.create('todo_' + t.id, alarmOptions);
-          scheduled.push({
-            id: t.id,
-            text: t.text,
-            time,
-            whenMs: alarmOptions.when,
-            when: new Date(alarmOptions.when).toLocaleString()
-          });
+      function buildSchedule() {
+        // Repeat 真循环: schedule each completed repeat todo to come back at the
+        // start of its next period. Runs even when reminders are off, since this is
+        // about the todo reappearing, not about notifying.
+        todos.forEach((t) => {
+          if (!t.completed) return;
+          const when = nextRepeatResetTime(t.completedAt, t.repeat);
+          if (when != null) chrome.alarms.create('reset_' + t.id, { when });
         });
-      if (typeof done === 'function') done(scheduled);
+
+        if (!enabled) {
+          finish(scheduled);
+          return;
+        }
+
+        // one alarm per unfinished todo, at its own time or the global default
+        todos
+          .filter((t) => !t.completed)
+          .forEach((t) => {
+            const snoozedUntil = Number(t.snoozedUntil);
+            if (Number.isFinite(snoozedUntil) && snoozedUntil > 0) {
+              // A persisted snooze missed while Chrome was closed is still due.
+              chrome.alarms.create('snooze_' + t.id, { when: Math.max(Date.now(), snoozedUntil) });
+            }
+            const time = t.reminderTime || globalTime;
+            const alarmOptions = reminderAlarmOptions(t, time);
+            if (!alarmOptions) return;
+            chrome.alarms.create('todo_' + t.id, alarmOptions);
+            scheduled.push({
+              id: t.id,
+              text: t.text,
+              time,
+              whenMs: alarmOptions.when,
+              when: new Date(alarmOptions.when).toLocaleString()
+            });
+          });
+        finish(scheduled);
+      }
     });
   });
 }
@@ -224,32 +270,26 @@ function notificationTodoId(notificationId) {
   return notificationId.slice('todo_'.length);
 }
 
-function clampMinutes(value, allowed, fallback) {
-  const n = parseInt(value, 10);
-  return allowed.includes(n) ? n : fallback;
-}
-
 function snoozeTodo(todoId, notificationId) {
-  chrome.storage.local.get(['snoozeMinutes', 'todos'], (res) => {
+  chrome.storage.local.get(['snoozeMinutes', 'todos', 'reminderEnabled'], (res) => {
     const todos = Array.isArray(res.todos) ? res.todos : [];
     const todo = todos.find((t) => String(t.id) === String(todoId));
     // Deleted meanwhile: writing the whole (possibly stale) array back would
     // widen the lost-update window for zero benefit, and a snooze alarm for a
     // missing todo would fire into silence anyway.
-    if (!todo) {
+    if (!todo || todo.completed || res.reminderEnabled === false) {
       chrome.notifications.clear(notificationId);
       return;
     }
-    const minutes = clampMinutes(res.snoozeMinutes, [5, 10, 15, 30], 10);
+    const minutes = clampSnoozeMinutes(res.snoozeMinutes);
     const when = Date.now() + minutes * 60 * 1000;
-    chrome.alarms.create('snooze_' + todoId, {
-      when
-    });
     todo.snoozedUntil = when;
     chrome.storage.local.set({ todos }, () => {
       if (chrome.runtime.lastError) {
         console.warn('[Sisyphus] snooze save failed:', chrome.runtime.lastError.message);
+        return;
       }
+      chrome.alarms.create('snooze_' + todoId, { when });
       chrome.notifications.clear(notificationId);
     });
   });
@@ -262,6 +302,7 @@ function completeTodo(todoId, notificationId) {
     if (todo) {
       todo.completed = true;
       todo.completedAt = Date.now();
+      delete todo.snoozedUntil;
       chrome.storage.local.set({ todos }, () => {
         if (chrome.runtime.lastError) {
           console.warn('[Sisyphus] complete save failed:', chrome.runtime.lastError.message);
@@ -278,43 +319,26 @@ function reminderAlarmOptions(todo, hhmm) {
   // A dated one-shot either fires once at its due moment or not at all. Without
   // this explicit branch an EXPIRED one-shot (dueDate in the past) would fall
   // through to the daily branch and nag every day forever.
-  if (todo && todo.oneShotReminder && /^\d{4}-\d{2}-\d{2}$/.test(String(todo.dueDate || ''))) {
+  if (todo && todo.oneShotReminder) {
     const oneShotWhen = oneShotReminderTime(todo, hhmm);
     return oneShotWhen != null ? { when: oneShotWhen } : null;
   }
-  return {
-    when: nextOccurrence(hhmm),
-    periodInMinutes: 1440 // every 24h, keeps the same clock time
-  };
+  return { when: nextOccurrence(hhmm) };
 }
 
 function oneShotReminderTime(todo, hhmm) {
   if (!todo || !todo.oneShotReminder || !todo.dueDate) return null;
-  const dateMatch = String(todo.dueDate).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const date = parseDateInput(todo.dueDate);
   const time = parseTimeParts(hhmm);
-  if (!dateMatch || !time) return null;
-
-  const when = new Date(
-    Number(dateMatch[1]),
-    Number(dateMatch[2]) - 1,
-    Number(dateMatch[3]),
-    time.h,
-    time.m,
-    0,
-    0
-  ).getTime();
+  if (!date) return null;
+  const when = date.setHours(time.h, time.m, 0, 0);
   if (!Number.isFinite(when) || when <= Date.now()) return null;
   return when;
 }
 
 function parseTimeParts(hhmm) {
-  const match = String(hhmm || '20:00').match(/^(\d{1,2}):(\d{1,2})$/);
-  if (!match) return { h: 20, m: 0 };
-  const h = Number(match[1]);
-  const m = Number(match[2]);
-  if (!Number.isFinite(h) || !Number.isFinite(m) || h < 0 || h > 23 || m < 0 || m > 59) {
-    return { h: 20, m: 0 };
-  }
+  const normalized = parseReminderInput(String(hhmm || '')) || '20:00';
+  const [h, m] = normalized.split(':').map(Number);
   return { h, m };
 }
 
