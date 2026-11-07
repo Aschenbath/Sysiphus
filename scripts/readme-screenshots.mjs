@@ -135,7 +135,6 @@ const CHIPS = {
   notification: ['Chrome alarms', 'Snooze', 'Done']
 };
 
-let currentLang = 'zh';
 let currentData = LOCALE_DATA.zh;
 let currentLangTag = 'zh-CN';
 
@@ -214,7 +213,9 @@ function buildStorage(data) {
       author: 'Albert Camus'
     },
     todoViewMode: 'all',
-    repeatRecovery_2026_06_01: true,
+    // Keep the owner's one-time exam import out of documentation fixtures.
+    examImport_2026_07_google_tasks_20260629: true,
+    examTitleMigration_20260629_subject_dates: true,
     lang: data === LOCALE_DATA.zh ? 'zh' : data.dir
   };
 }
@@ -1200,7 +1201,6 @@ async function main() {
     await waitForChrome(port);
 
     for (const lang of LANGS) {
-      currentLang = lang;
       currentData = LOCALE_DATA[lang];
       currentLangTag = currentData.tag;
       storage = buildStorage(currentData);

@@ -49,8 +49,6 @@ textarea {
 .reminder-label,
 .reminder-hint,
 .todo-text,
-.todo-meta,
-.todo-due,
 .empty-state {
   font-family: var(--font-system);
 }
@@ -234,12 +232,6 @@ h1.editing {
 
 .time-field:focus {
   border-color: #2c3e50;
-}
-
-.time-colon {
-  font-family: var(--font-system);
-  color: #2c3e50;
-  font-weight: 600;
 }
 
 .reminder-hint {
@@ -571,7 +563,6 @@ h1.editing {
   }
 }
 
-.btn-save,
 .btn-cancel {
   padding: 7px 18px;
   border: none;
@@ -580,18 +571,6 @@ h1.editing {
   cursor: pointer;
   transition: all 0.2s;
   font-weight: 500;
-}
-
-.btn-save {
-  background: #2c3e50;
-  color: white;
-  min-width: 62px;
-}
-
-.btn-save:hover {
-  background: #1a252f;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.3);
 }
 
 .btn-cancel {
@@ -742,24 +721,6 @@ h1.editing {
 .todo-item.completed .todo-text {
   text-decoration: line-through;
   color: #999;
-}
-
-.todo-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-  font-size: 12px;
-  color: #666;
-}
-
-.todo-due {
-  color: #666;
-}
-
-.todo-due.overdue {
-  color: #e74c3c;
-  font-weight: 500;
 }
 
 .todo-actions {
@@ -920,14 +881,12 @@ html[data-theme="dark"] {
   color: #f5f5f7;
 }
 
-[data-theme="dark"] .add-btn,
-[data-theme="dark"] .btn-save {
+[data-theme="dark"] .add-btn {
   background: #f5f5f7;
   color: #1c1c1e;
 }
 
-[data-theme="dark"] .add-btn:hover,
-[data-theme="dark"] .btn-save:hover {
+[data-theme="dark"] .add-btn:hover {
   background: #ffffff;
 }
 
@@ -988,15 +947,6 @@ html[data-theme="dark"] {
 
 [data-theme="dark"] .todo-item.completed .todo-text {
   color: #8e8e93;
-}
-
-[data-theme="dark"] .todo-meta,
-[data-theme="dark"] .todo-due {
-  color: #aeaeb2;
-}
-
-[data-theme="dark"] .todo-due.overdue {
-  color: #ff6b6b;
 }
 
 [data-theme="dark"] .todo-checkbox {
@@ -1088,10 +1038,6 @@ html[data-theme="dark"] {
 [data-theme="dark"] .time-field {
   background: #1c1c1e;
   border-color: #3a3a3c;
-  color: #e8e8ea;
-}
-
-[data-theme="dark"] .time-colon {
   color: #e8e8ea;
 }
 

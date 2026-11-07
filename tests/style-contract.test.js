@@ -30,8 +30,6 @@ test('user-entered todo content and controls use the system font', () => {
     '.todo-input',
     '.form-input',
     '.todo-text',
-    '.todo-meta',
-    '.todo-due',
     '.form-group label',
     '.select-display',
     '.select-option',
